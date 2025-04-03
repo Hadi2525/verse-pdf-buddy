@@ -67,8 +67,8 @@ export default {
 					primary: '#6366f1',
 					secondary: '#a5b4fc',
 					accent: '#3b82f6',
-					background: '#f9fafb',
-					text: '#1f2937'
+					background: '#1A1F2C',
+					text: '#E2E8F0'
 				}
 			},
 			borderRadius: {

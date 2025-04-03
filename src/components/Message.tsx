@@ -25,7 +25,7 @@ const Message: React.FC<MessageProps> = ({
     )}>
       {!isUser && (
         <div className="flex-shrink-0 mr-2">
-          <div className="flex items-center justify-center h-8 w-8 rounded-full bg-pdf-primary/10">
+          <div className="flex items-center justify-center h-8 w-8 rounded-full bg-pdf-primary/20">
             <Bot className="h-5 w-5 text-pdf-primary" />
           </div>
         </div>

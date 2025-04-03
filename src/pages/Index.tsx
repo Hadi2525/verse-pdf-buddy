@@ -59,32 +59,32 @@ const Index = () => {
   const getStatusColor = (status: FileInfo["status"]) => {
     switch (status) {
       case "uploading":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-900/30 text-blue-300";
       case "indexing":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-900/30 text-yellow-300";
       case "indexed":
-        return "bg-green-100 text-green-800";
+        return "bg-green-900/30 text-green-300";
       case "error":
-        return "bg-red-100 text-red-800";
+        return "bg-red-900/30 text-red-300";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-900/30 text-gray-300";
     }
   };
 
   return (
-    <div className="min-h-screen bg-pdf-background">
-      <div className="container mx-auto py-8 px-4">
+    <div className="min-h-screen bg-pdf-background flex items-center justify-center p-4">
+      <div className="container max-w-6xl mx-auto">
         <header className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-pdf-primary mb-2">PDF Buddy</h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="text-gray-400 max-w-2xl mx-auto">
             Upload your PDFs and chat with an AI that can reference specific content from your documents
           </p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1 space-y-6">
-            <Tabs defaultValue="upload">
-              <TabsList className="grid w-full grid-cols-2">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="lg:w-1/3 space-y-6">
+            <Tabs defaultValue="upload" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 bg-[#2A2F3C]">
                 <TabsTrigger value="upload">Upload</TabsTrigger>
                 <TabsTrigger value="files">
                   Files
@@ -101,28 +101,28 @@ const Index = () => {
               </TabsContent>
               
               <TabsContent value="files" className="mt-4">
-                <Card>
+                <Card className="bg-[#2A2F3C] border-gray-700">
                   <CardHeader>
                     <CardTitle className="text-pdf-primary">Your Files</CardTitle>
                   </CardHeader>
                   <CardContent>
                     {files.length === 0 ? (
-                      <div className="text-center py-6 text-gray-500">
+                      <div className="text-center py-6 text-gray-400">
                         <p>No files uploaded yet</p>
                       </div>
                     ) : (
                       <ul className="space-y-3">
                         {files.map((file) => (
-                          <li key={file.id} className="border rounded-lg p-3">
+                          <li key={file.id} className="border border-gray-700 rounded-lg p-3 bg-[#222632]">
                             <div className="flex items-start">
                               <div className="flex-shrink-0 mr-3">
                                 <File className="h-5 w-5 text-pdf-primary" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 truncate">
+                                <p className="text-sm font-medium text-gray-200 truncate">
                                   {file.name}
                                 </p>
-                                <div className="flex items-center text-xs text-gray-500 mt-1">
+                                <div className="flex items-center text-xs text-gray-400 mt-1">
                                   <span>
                                     {(file.size / 1024 / 1024).toFixed(2)} MB
                                   </span>
@@ -159,7 +159,7 @@ const Index = () => {
             </Tabs>
           </div>
           
-          <div className="lg:col-span-2">
+          <div className="lg:w-2/3">
             <ChatInterface files={files} />
           </div>
         </div>

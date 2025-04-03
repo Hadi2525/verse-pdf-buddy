@@ -21,7 +21,7 @@ const ReferenceList: React.FC<ReferenceListProps> = ({
   }
 
   return (
-    <Card className="w-full max-w-md animate-fade-in">
+    <Card className="w-full max-w-md animate-fade-in bg-[#2A2F3C] border-gray-700 text-gray-200">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-md font-medium flex items-center text-pdf-primary">
           <BookOpen className="h-4 w-4 mr-2" />
@@ -29,7 +29,7 @@ const ReferenceList: React.FC<ReferenceListProps> = ({
         </CardTitle>
         <button 
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-500"
+          className="text-gray-400 hover:text-gray-300"
         >
           <span className="sr-only">Close</span>
           <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -37,15 +37,15 @@ const ReferenceList: React.FC<ReferenceListProps> = ({
           </svg>
         </button>
       </CardHeader>
-      <Separator />
+      <Separator className="bg-gray-700" />
       <CardContent className="pt-4 max-h-[300px] overflow-y-auto">
         <ul className="space-y-3">
           {references.map((ref, index) => (
-            <li key={index} className="bg-gray-50 rounded-lg p-3">
+            <li key={index} className="bg-[#222632] rounded-lg p-3 border border-gray-700">
               <div className="reference-tag mb-2">
                 {ref.reference}
               </div>
-              <p className="text-sm text-gray-700">{ref.content}</p>
+              <p className="text-sm text-gray-300">{ref.content}</p>
             </li>
           ))}
         </ul>
