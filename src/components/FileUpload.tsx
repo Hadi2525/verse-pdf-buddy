@@ -59,7 +59,22 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
     try {
       setIsUploading(true);
       
-      // Simulate progress for better UX since the actual API doesn't report progress
+      // Create a unique ID for this upload
+      const tempId = crypto.randomUUID();
+      
+      // Create a temporary file info to show in the UI
+      const tempFileInfo: FileInfo = {
+        id: tempId,
+        name: selectedFile.name,
+        size: selectedFile.size,
+        status: "uploading",
+        startPage,
+        endPage
+      };
+      
+      onFileUploaded(tempFileInfo);
+      
+      // Simulate progress for better UX
       const progressInterval = setInterval(() => {
         setUploadProgress((prev) => {
           if (prev >= 95) {
@@ -70,52 +85,61 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
         });
       }, 300);
 
-      // Create a temporary file info to show in the UI
-      const tempFileInfo: FileInfo = {
-        id: crypto.randomUUID(),
-        name: selectedFile.name,
-        size: selectedFile.size,
-        status: "uploading",
-        startPage,
-        endPage
-      };
-      
-      onFileUploaded(tempFileInfo);
-
-      // Call the API to upload and index the PDF
-      // Comment out for now as the backend isn't fully implemented
-      /*
-      const fileInfo = await api.uploadPdf(selectedFile, startPage, endPage);
-      onFileUploaded(fileInfo);
-      */
-      
-      // Simulate successful upload for testing UI
-      setTimeout(() => {
-        clearInterval(progressInterval);
-        setUploadProgress(100);
+      try {
+        // Call the API to upload and index the PDF
+        const fileInfo = await api.uploadPdf(selectedFile, startPage, endPage);
         
-        // Update the file status to indexed after "processing"
+        // Update with the returned info
         const indexedFileInfo: FileInfo = {
-          ...tempFileInfo,
-          status: "indexed",
-          pages: Math.max(30, endPage) // Simulate page count
+          id: tempId, // Keep the same ID to avoid duplicates
+          name: selectedFile.name,
+          size: selectedFile.size,
+          status: fileInfo.status,
+          pages: fileInfo.page_count,
+          startPage,
+          endPage,
         };
         
+        clearInterval(progressInterval);
+        setUploadProgress(100);
         onFileUploaded(indexedFileInfo);
-        
-        setIsUploading(false);
-        setSelectedFile(null);
-        setStartPage(1);
-        setEndPage(1);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
         
         toast({
           title: "Upload complete",
           description: "Your PDF has been successfully indexed",
         });
-      }, 3000);
+      } catch (error: any) {
+        // Handle API error
+        clearInterval(progressInterval);
+        
+        // Update file status to error
+        const errorFileInfo: FileInfo = {
+          id: tempId,
+          name: selectedFile.name,
+          size: selectedFile.size,
+          status: "error",
+          error: error.message || "Failed to upload file",
+          startPage,
+          endPage
+        };
+        
+        onFileUploaded(errorFileInfo);
+        
+        toast({
+          title: "Upload failed",
+          description: error.message || "An error occurred while uploading the PDF",
+          variant: "destructive",
+        });
+      }
+      
+      setIsUploading(false);
+      setSelectedFile(null);
+      setStartPage(1);
+      setEndPage(1);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      
     } catch (error: any) {
       toast({
         title: "Upload failed",

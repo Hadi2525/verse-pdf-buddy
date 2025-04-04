@@ -51,35 +51,25 @@ export const api = {
     }
   },
 
-  async uploadPdf(file: File, startPage: number, endPage: number): Promise<FileInfo> {
+  async uploadPdf(file: File, startPage: number, endPage: number): Promise<any> {
     try {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch(
-        `${API_URL}/index-pdf?starting_page=${startPage}&ending_page=${endPage}`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      // Use URL parameters for starting_page and ending_page
+      const url = `${API_URL}/index-pdf?starting_page=${startPage}&ending_page=${endPage}`;
+      
+      const response = await fetch(url, {
+        method: "POST",
+        body: formData,
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Failed to upload PDF: ${errorText}`);
       }
 
-      const data = await response.json();
-      
-      return {
-        id: crypto.randomUUID(),
-        name: file.name,
-        size: file.size,
-        pages: data.page_count,
-        status: data.status,
-        startPage,
-        endPage
-      };
+      return await response.json();
     } catch (error) {
       console.error("Error uploading PDF:", error);
       throw error;
