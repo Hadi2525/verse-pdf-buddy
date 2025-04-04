@@ -36,12 +36,9 @@ const Message: React.FC<MessageProps> = ({
         isUser ? "items-end" : "items-start"
       )}>
         <div className={isUser ? "chat-bubble-user" : "chat-bubble-ai"}>
-          {message.content.split('\n').map((text, i) => (
-            <React.Fragment key={i}>
-              {text}
-              {i !== message.content.split('\n').length - 1 && <br />}
-            </React.Fragment>
-          ))}
+          <div className="whitespace-pre-wrap">
+            {message.content}
+          </div>
         </div>
         
         {hasReferences && !isUser && (
