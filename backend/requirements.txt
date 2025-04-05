@@ -1,0 +1,10 @@
+quart
+quart-cors
+hypercorn
+google-genai
+PyPDF2==3.0.1
+pymongo
+python-dotenv
+ollama
+python-multipart==0.0.20
+openai

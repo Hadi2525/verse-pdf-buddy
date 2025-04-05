@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "context-aware-rag"  # Replace with your project name
+version = "0.1.0"
+authors = [
+  { name = "Full Stack AI Lab", email = "fullstackailab@gmail.com" },
+]
+description = "This app builds the production ready context-aware RAG system suited to upload a pdf file and index it on the fly"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi==0.115.11",
+  "uvicorn==0.34.0",
+  "google-genai==1.5.0",
+  "PyPDF2==3.0.1",
+  "pymongo==4.11.2",
+  "python-dotenv==1.0.1",
+  "ollama==0.4.7",
+  "python-multipart==0.0.20",
+]
+license = { file = "LICENSE" }
+
+[project.optional-dependencies]
+test = [
+  "pytest",
+  "pytest-asyncio",
+]
+
+[project.scripts]
+your_app = "app.main:app"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]  # Explicitly tell Hatchling to include the 'app' directory
