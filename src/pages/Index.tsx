@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { FileInfo } from "@/types";
@@ -9,6 +9,10 @@ import { File, CheckCircle, AlertCircle, Loader, FileText, Upload as UploadIcon 
 
 const Index = () => {
   const [files, setFiles] = useState<FileInfo[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("upload");
+  
+  // Find the currently uploading file (if any)
+  const uploadingFile = files.find(file => file.status === "uploading");
 
   const handleFileUploaded = (newFile: FileInfo) => {
     // Check if the file is already in the list (for status updates)
@@ -19,6 +23,12 @@ const Index = () => {
       const updatedFiles = [...files];
       updatedFiles[existingFileIndex] = newFile;
       setFiles(updatedFiles);
+      
+      // If a file has completed uploading and we're on the upload tab,
+      // switch to the files tab to show the result
+      if (newFile.status === "indexed" && activeTab === "upload" && updatedFiles[existingFileIndex].status === "uploading") {
+        setActiveTab("files");
+      }
     } else {
       // Add the new file
       setFiles([...files, newFile]);
@@ -72,6 +82,13 @@ const Index = () => {
 
   const indexedFiles = files.filter(file => file.status === "indexed");
 
+  // Switch to files tab automatically when a file starts uploading
+  useEffect(() => {
+    if (uploadingFile && activeTab === "upload") {
+      setActiveTab("files");
+    }
+  }, [uploadingFile, activeTab]);
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <div className="container max-w-6xl mx-auto">
@@ -87,7 +104,7 @@ const Index = () => {
 
         <div className="grid lg:grid-cols-12 gap-6">
           <div className="lg:col-span-4 space-y-6">
-            <Tabs defaultValue="upload" className="glass-card p-1">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="glass-card p-1">
               <TabsList className="grid w-full grid-cols-2 bg-background/40 mb-3 p-1">
                 <TabsTrigger value="upload" className="data-[state=active]:tab-active">
                   <UploadIcon className="h-4 w-4 mr-2" />
@@ -105,7 +122,10 @@ const Index = () => {
               </TabsList>
               
               <TabsContent value="upload" className="mt-0 animate-fade-in">
-                <FileUpload onFileUploaded={handleFileUploaded} />
+                <FileUpload 
+                  onFileUploaded={handleFileUploaded} 
+                  activeFile={uploadingFile} 
+                />
               </TabsContent>
               
               <TabsContent value="files" className="mt-0 animate-fade-in">
