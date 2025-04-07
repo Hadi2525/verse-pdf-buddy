@@ -2,10 +2,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, MessageSquare } from "lucide-react";
 import Message from "./Message";
 import ReferenceList from "./ReferenceList";
 import { ChatMessage, Reference, FileInfo } from "@/types";
@@ -106,18 +105,23 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ files }) => {
   };
 
   return (
-    <div className="flex flex-col h-full border rounded-lg bg-white shadow-sm">
-      <div className="px-4 py-3 border-b">
-        <h2 className="text-lg font-medium text-pdf-primary">PDF Chat</h2>
-        <p className="text-sm text-gray-500">
-          {hasIndexedFiles 
-            ? `Chatting with ${indexedFiles.length} indexed file${indexedFiles.length > 1 ? 's' : ''}`
-            : "Upload a PDF to start chatting"}
-        </p>
+    <div className="glass-card flex flex-col h-[600px] overflow-hidden">
+      <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-medium text-primary flex items-center">
+            <MessageSquare className="h-5 w-5 mr-2 text-primary/70" />
+            PDF Chat
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {hasIndexedFiles 
+              ? `Chatting with ${indexedFiles.length} indexed file${indexedFiles.length > 1 ? 's' : ''}`
+              : "Upload a PDF to start chatting"}
+          </p>
+        </div>
       </div>
       
-      <div className="flex-1 flex flex-col p-4 space-y-4 overflow-hidden">
-        <div className="flex-1 relative">
+      <div className="flex-1 flex flex-col p-4 overflow-hidden">
+        <div className="relative flex-1">
           {references.length > 0 && showReferences && (
             <div className="absolute right-0 top-0 z-10 p-2">
               <ReferenceList 
@@ -128,28 +132,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ files }) => {
             </div>
           )}
           
-          <ScrollArea className="h-full">
-            <div className="space-y-4 px-1">
+          <ScrollArea className="h-full pr-2">
+            <div className="space-y-6 px-2">
               {messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full py-12 text-center text-gray-500">
-                  <div className="rounded-full bg-pdf-primary/10 p-3 mb-4">
-                    <svg
-                      className="h-6 w-6 text-pdf-primary"
-                      fill="none"
-                      height="24"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                    </svg>
+                <div className="flex flex-col items-center justify-center h-full py-16 text-center">
+                  <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mb-4">
+                    <MessageSquare className="h-8 w-8 text-primary/50" />
                   </div>
-                  <h3 className="text-lg font-medium">Start a conversation</h3>
-                  <p className="text-sm max-w-md mt-2">
+                  <h3 className="text-xl font-medium bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
+                    Start a conversation
+                  </h3>
+                  <p className="text-muted-foreground max-w-md">
                     {hasIndexedFiles
                       ? "Ask questions about your PDF documents and I'll provide answers with references."
                       : "Upload and index a PDF first to start chatting."}
@@ -176,8 +169,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ files }) => {
           </ScrollArea>
         </div>
         
-        <form onSubmit={handleSubmit} className="flex items-end gap-2">
-          <div className="flex-1">
+        <form onSubmit={handleSubmit} className="mt-4 flex items-center gap-2">
+          <div className="flex-1 relative">
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -187,14 +180,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ files }) => {
                   : "Upload a PDF to start chatting"
               }
               disabled={isLoading || !hasIndexedFiles}
-              className="resize-none"
+              className="pr-10 py-6 bg-muted/50 border-muted"
             />
           </div>
           <Button 
             type="submit" 
             size="icon"
             disabled={isLoading || !hasIndexedFiles || inputValue.trim() === ""}
-            className="bg-pdf-primary hover:bg-pdf-primary/90"
+            className="h-12 w-12 rounded-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
           >
             {isLoading ? (
               <Loader2 className="h-5 w-5 animate-spin" />

@@ -2,12 +2,11 @@
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { FileInfo } from "@/types";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
-import { File, Upload, X, CheckCircle, AlertCircle } from "lucide-react";
+import { File, Upload, X, FileText } from "lucide-react";
 
 interface FileUploadProps {
   onFileUploaded: (file: FileInfo) => void;
@@ -112,14 +111,16 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
       });
       
       // Reset the form
-      setIsUploading(false);
-      setSelectedFile(null);
-      setStartPage(1);
-      setEndPage(1);
-      setUploadProgress(0);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      setTimeout(() => {
+        setIsUploading(false);
+        setSelectedFile(null);
+        setStartPage(1);
+        setEndPage(1);
+        setUploadProgress(0);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      }, 1000);
       
     } catch (error: any) {
       // Handle API error
@@ -128,7 +129,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
       
       // Update file status to error
       const errorFileInfo: FileInfo = {
-        id: crypto.randomUUID(), // Generate a new ID to avoid duplicates
+        id: tempId || crypto.randomUUID(), // Use the same ID if available or generate a new one
         name: selectedFile.name,
         size: selectedFile.size,
         status: "error",
@@ -152,53 +153,57 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="text-center text-pdf-primary">Upload PDF</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:border-pdf-primary transition-colors"
-          onClick={() => fileInputRef.current?.click()}>
-          <Upload className="h-10 w-10 text-gray-400 mb-2" />
-          <p className="text-sm text-gray-500">
-            {selectedFile ? selectedFile.name : "Click to select a PDF file"}
-          </p>
-          <Input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf"
-            className="hidden"
-            onChange={handleFileChange}
-            disabled={isUploading}
-          />
+    <div className="p-6">
+      <div 
+        className="upload-zone flex flex-col items-center justify-center p-8 cursor-pointer"
+        onClick={() => fileInputRef.current?.click()}
+      >
+        <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+          <Upload className="h-8 w-8 text-primary/70" />
         </div>
+        <p className="text-foreground font-medium mb-1">
+          {selectedFile ? selectedFile.name : "Upload a PDF"}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Click to browse your files
+        </p>
+        <Input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf"
+          className="hidden"
+          onChange={handleFileChange}
+          disabled={isUploading}
+        />
+      </div>
 
-        {selectedFile && (
-          <div className="flex items-center justify-between bg-gray-50 p-2 rounded">
-            <div className="flex items-center">
-              <File className="h-5 w-5 text-pdf-primary mr-2" />
-              <span className="text-sm truncate max-w-[150px]">{selectedFile.name}</span>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                setSelectedFile(null);
-                if (fileInputRef.current) {
-                  fileInputRef.current.value = "";
-                }
-              }}
-              disabled={isUploading}
-              className="h-7 w-7"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
+      {selectedFile && (
+        <div className="mt-4 p-3 rounded-lg bg-accent/50 border border-border flex items-center">
+          <FileText className="h-5 w-5 text-primary mr-3" />
+          <span className="text-sm truncate flex-1">{selectedFile.name}</span>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedFile(null);
+              if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+              }
+            }}
+            disabled={isUploading}
+            className="h-7 w-7 rounded-full hover:bg-muted"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
 
+      <div className="mt-6 space-y-4">
+        <div className="text-sm font-medium mb-2">Page Range</div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label htmlFor="startPage" className="text-sm font-medium">
+            <label htmlFor="startPage" className="text-sm text-muted-foreground">
               Start Page
             </label>
             <Input
@@ -208,10 +213,11 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
               value={startPage}
               onChange={(e) => setStartPage(parseInt(e.target.value) || 1)}
               disabled={isUploading}
+              className="bg-muted/50 border-muted"
             />
           </div>
           <div className="space-y-2">
-            <label htmlFor="endPage" className="text-sm font-medium">
+            <label htmlFor="endPage" className="text-sm text-muted-foreground">
               End Page
             </label>
             <Input
@@ -221,30 +227,30 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
               value={endPage}
               onChange={(e) => setEndPage(parseInt(e.target.value) || 1)}
               disabled={isUploading}
+              className="bg-muted/50 border-muted"
             />
           </div>
         </div>
 
         {isUploading && (
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>Uploading...</span>
+          <div className="space-y-2 mt-4">
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Processing...</span>
               <span>{uploadProgress}%</span>
             </div>
             <Progress value={uploadProgress} className="h-2" />
           </div>
         )}
-      </CardContent>
-      <CardFooter>
+
         <Button 
-          className="w-full bg-pdf-primary hover:bg-pdf-primary/90"
+          className="w-full mt-6 bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
           onClick={handleUpload}
           disabled={!selectedFile || isUploading}
         >
           {isUploading ? "Processing..." : "Upload and Index"}
         </Button>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 };
 

@@ -1,9 +1,8 @@
 
 import React from "react";
 import { Reference } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen } from "lucide-react";
+import { BookOpen, X } from "lucide-react";
 
 interface ReferenceListProps {
   references: Reference[];
@@ -21,36 +20,36 @@ const ReferenceList: React.FC<ReferenceListProps> = ({
   }
 
   return (
-    <Card className="w-full max-w-md animate-fade-in bg-[#2A2F3C] border-gray-700 text-gray-200">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-md font-medium flex items-center text-pdf-primary">
-          <BookOpen className="h-4 w-4 mr-2" />
-          References
-        </CardTitle>
+    <div className="glass-card w-full max-w-md animate-fade-in shadow-xl border border-primary/20">
+      <div className="p-4 flex items-center justify-between">
+        <div className="flex items-center text-primary space-x-2">
+          <BookOpen className="h-4 w-4" />
+          <h3 className="text-md font-medium">References</h3>
+        </div>
         <button 
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-300"
+          className="text-muted-foreground hover:text-foreground transition-colors rounded-full w-6 h-6 flex items-center justify-center hover:bg-muted"
         >
           <span className="sr-only">Close</span>
-          <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-          </svg>
+          <X className="h-4 w-4" />
         </button>
-      </CardHeader>
-      <Separator className="bg-gray-700" />
-      <CardContent className="pt-4 max-h-[300px] overflow-y-auto">
+      </div>
+      
+      <Separator className="bg-border" />
+      
+      <div className="p-4 max-h-[300px] overflow-y-auto">
         <ul className="space-y-3">
           {references.map((ref, index) => (
-            <li key={index} className="bg-[#222632] rounded-lg p-3 border border-gray-700">
+            <li key={index} className="bg-muted/60 rounded-lg p-3 border border-border shadow-sm">
               <div className="reference-tag mb-2">
                 {ref.reference}
               </div>
-              <p className="text-sm text-gray-300">{ref.content}</p>
+              <p className="text-sm text-foreground/80">{ref.content}</p>
             </li>
           ))}
         </ul>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
