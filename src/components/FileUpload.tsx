@@ -123,13 +123,17 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
       }, 1000);
       
     } catch (error: any) {
+      // Store a reference to the tempId created in the try block
+      // This ensures tempId is in scope even in the catch block
+      const errorTempId = crypto.randomUUID(); // Create a new ID for error case
+      
       // Handle API error
       setUploadProgress(0);
       setIsUploading(false);
       
       // Update file status to error
       const errorFileInfo: FileInfo = {
-        id: tempId || crypto.randomUUID(), // Use the same ID if available or generate a new one
+        id: errorTempId,
         name: selectedFile.name,
         size: selectedFile.size,
         status: "error",
