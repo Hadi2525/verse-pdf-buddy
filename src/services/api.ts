@@ -69,7 +69,8 @@ export const api = {
         throw new Error(`Failed to upload PDF: ${errorText}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      return result;
     } catch (error) {
       console.error("Error uploading PDF:", error);
       throw error;

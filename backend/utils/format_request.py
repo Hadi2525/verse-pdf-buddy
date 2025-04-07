@@ -1,4 +1,3 @@
-
 """
 Format the queries to fit the request format for endpoints
 """
@@ -16,15 +15,25 @@ def format_inserts(data):
                     "document_embedding": data["document_embedding"],
                 }
 
-def format_context_list(context_list):
-    result = ""
-    for i, item in enumerate(context_list, 1):
-        result += f"content {i}:\n"
-        result += f"text: {item['text']}\n"
-        # Round relevance_score to 4 decimal places
-        rounded_score = round(item['search_score'], 4)
-        result += f"relevance_score: {rounded_score}\n"
-        # Add an extra newline between entries (except after the last one)
-        if i < len(context_list):
-            result += "\n"
-    return result
+def format_context_list(search_results):
+    """
+    Format search results into a markdown-friendly context string
+    
+    Args:
+        search_results (list): List of search results
+        
+    Returns:
+        str: Formatted context string
+    """
+    if not search_results:
+        return "No relevant information found."
+    
+    # Format each result into markdown
+    formatted_results = []
+    for result in search_results:
+        if "content" in result and "reference" in result:
+            formatted_results.append(f"## Reference: {result['reference']}\n\n{result['content']}\n")
+    
+    # Join all formatted results
+    context = "\n".join(formatted_results)
+    return context

@@ -58,6 +58,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
 
     try {
       setIsUploading(true);
+      setUploadProgress(0);
       
       // Create a unique ID for this upload
       const tempId = crypto.randomUUID();
@@ -74,80 +75,79 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
       
       onFileUploaded(tempFileInfo);
       
-      // Simulate progress for better UX
+      // Simulate initial progress
       const progressInterval = setInterval(() => {
         setUploadProgress((prev) => {
-          if (prev >= 95) {
+          if (prev >= 90) {
             clearInterval(progressInterval);
-            return prev;
+            return 90;
           }
           return prev + 5;
         });
       }, 300);
 
-      try {
-        // Call the API to upload and index the PDF
-        const fileInfo = await api.uploadPdf(selectedFile, startPage, endPage);
-        
-        // Update with the returned info
-        const indexedFileInfo: FileInfo = {
-          id: tempId, // Keep the same ID to avoid duplicates
-          name: selectedFile.name,
-          size: selectedFile.size,
-          status: fileInfo.status,
-          pages: fileInfo.page_count,
-          startPage,
-          endPage,
-        };
-        
-        clearInterval(progressInterval);
-        setUploadProgress(100);
-        onFileUploaded(indexedFileInfo);
-        
-        toast({
-          title: "Upload complete",
-          description: "Your PDF has been successfully indexed",
-        });
-      } catch (error: any) {
-        // Handle API error
-        clearInterval(progressInterval);
-        
-        // Update file status to error
-        const errorFileInfo: FileInfo = {
-          id: tempId,
-          name: selectedFile.name,
-          size: selectedFile.size,
-          status: "error",
-          error: error.message || "Failed to upload file",
-          startPage,
-          endPage
-        };
-        
-        onFileUploaded(errorFileInfo);
-        
-        toast({
-          title: "Upload failed",
-          description: error.message || "An error occurred while uploading the PDF",
-          variant: "destructive",
-        });
-      }
+      // Call the API to upload and index the PDF
+      const result = await api.uploadPdf(selectedFile, startPage, endPage);
       
+      // Clear the interval and set to 100%
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      
+      // Update with the completed info
+      const indexedFileInfo: FileInfo = {
+        id: tempId,
+        name: selectedFile.name,
+        size: selectedFile.size,
+        status: "indexed",
+        pages: result.page_count,
+        startPage,
+        endPage,
+      };
+      
+      onFileUploaded(indexedFileInfo);
+      
+      toast({
+        title: "Upload complete",
+        description: "Your PDF has been successfully indexed",
+      });
+      
+      // Reset the form
       setIsUploading(false);
       setSelectedFile(null);
       setStartPage(1);
       setEndPage(1);
+      setUploadProgress(0);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
       
     } catch (error: any) {
+      // Handle API error
+      setUploadProgress(0);
+      setIsUploading(false);
+      
+      // Update file status to error
+      const errorFileInfo: FileInfo = {
+        id: crypto.randomUUID(), // Generate a new ID to avoid duplicates
+        name: selectedFile.name,
+        size: selectedFile.size,
+        status: "error",
+        error: error.message || "Failed to upload file",
+        startPage,
+        endPage
+      };
+      
+      onFileUploaded(errorFileInfo);
+      
       toast({
         title: "Upload failed",
         description: error.message || "An error occurred while uploading the PDF",
         variant: "destructive",
       });
-      setIsUploading(false);
-      setUploadProgress(0);
+      
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 

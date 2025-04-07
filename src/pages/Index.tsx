@@ -21,8 +21,9 @@ const Index = () => {
       updatedFiles[existingFileIndex] = newFile;
       setFiles(updatedFiles);
     } else {
-      // Add the new file
-      setFiles(prev => [...prev, newFile]);
+      // Remove any files with the same name to avoid visual duplicates
+      const filteredFiles = files.filter(f => f.name !== newFile.name);
+      setFiles([...filteredFiles, newFile]);
     }
   };
 
@@ -113,7 +114,7 @@ const Index = () => {
                     ) : (
                       <ul className="space-y-3">
                         {files.map((file) => (
-                          <li key={file.id} className="border border-gray-700 rounded-lg p-3 bg-[#222632]">
+                          <li key={`file-${file.id}`} className="border border-gray-700 rounded-lg p-3 bg-[#222632]">
                             <div className="flex items-start">
                               <div className="flex-shrink-0 mr-3">
                                 <File className="h-5 w-5 text-pdf-primary" />
@@ -149,6 +150,11 @@ const Index = () => {
                                 </div>
                               </div>
                             </div>
+                            {file.error && (
+                              <div className="mt-2 text-xs text-red-300">
+                                Error: {file.error}
+                              </div>
+                            )}
                           </li>
                         ))}
                       </ul>
