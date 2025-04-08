@@ -123,8 +123,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ files }) => {
         </div>
       </div>
       
-      <div className="flex-1 flex flex-col p-4 overflow-hidden">
-        <div className="relative flex-1">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="relative flex-1 overflow-hidden">
           {references.length > 0 && showReferences && (
             <div className="absolute right-0 top-0 z-10 p-2">
               <ReferenceList 
@@ -135,10 +135,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ files }) => {
             </div>
           )}
           
-          <ScrollArea className="h-full pr-2">
-            <div className="space-y-6 px-2 pb-4">
+          <ScrollArea className="h-full w-full">
+            <div className="space-y-6 px-4 py-4">
               {messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full py-16 text-center">
+                <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-center">
                   <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mb-4">
                     <MessageSquare className="h-8 w-8 text-primary/50" />
                   </div>
@@ -193,7 +193,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ files }) => {
           </ScrollArea>
         </div>
         
-        <form onSubmit={handleSubmit} className="mt-4 flex items-center gap-2">
+        <form onSubmit={handleSubmit} className="mt-4 px-4 pb-4 flex items-center gap-2">
           <div className="flex-1 relative">
             <Input
               value={inputValue}
