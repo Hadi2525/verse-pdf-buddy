@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -169,14 +170,6 @@ const Index = () => {
                                   <>
                                     <span className="inline-block w-1 h-1 rounded-full bg-muted-foreground"></span>
                                     <span>{file.pages} pages</span>
-                                  </>
-                                )}
-                                {file.startPage && file.endPage && (
-                                  <>
-                                    <span className="inline-block w-1 h-1 rounded-full bg-muted-foreground"></span>
-                                    <span>
-                                      Pages {file.startPage}-{file.endPage}
-                                    </span>
                                   </>
                                 )}
                               </div>
