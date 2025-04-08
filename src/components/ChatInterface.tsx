@@ -9,6 +9,7 @@ import Message from "./Message";
 import ReferenceList from "./ReferenceList";
 import { ChatMessage, Reference, FileInfo } from "@/types";
 import { api } from "@/services/api";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ChatInterfaceProps {
   files: FileInfo[];
@@ -24,7 +25,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ files }) => {
   const { toast } = useToast();
   
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   useEffect(() => {
@@ -133,7 +136,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ files }) => {
           )}
           
           <ScrollArea className="h-full pr-2">
-            <div className="space-y-6 px-2">
+            <div className="space-y-6 px-2 pb-4">
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full py-16 text-center">
                   <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mb-4">
@@ -164,6 +167,27 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ files }) => {
                   />
                 ))
               )}
+              
+              {/* Loading indicator for waiting response */}
+              {isLoading && (
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 mr-2">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted">
+                      <Loader2 className="h-5 w-5 text-primary animate-spin" />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="chat-bubble-ai">
+                      <div className="flex flex-col space-y-3">
+                        <Skeleton className="h-4 w-[200px]" />
+                        <Skeleton className="h-4 w-[300px]" />
+                        <Skeleton className="h-4 w-[250px]" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div ref={messagesEndRef} />
             </div>
           </ScrollArea>
