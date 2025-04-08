@@ -1,4 +1,3 @@
-
 import { GenerateRequest, FileInfo, APIResponse } from "../types";
 
 // Configure your backend URL here
@@ -51,13 +50,13 @@ export const api = {
     }
   },
 
-  async uploadPdf(file: File, startPage: number, endPage: number): Promise<any> {
+  async uploadPdf(file: File): Promise<any> {
     try {
       const formData = new FormData();
       formData.append("file", file);
-
-      // Use URL parameters for starting_page and ending_page
-      const url = `${API_URL}/index-pdf?starting_page=${startPage}&ending_page=${endPage}`;
+      
+      // Upload the entire PDF without specifying page range
+      const url = `${API_URL}/index-pdf`;
       
       const response = await fetch(url, {
         method: "POST",
@@ -69,10 +68,16 @@ export const api = {
         throw new Error(`Failed to upload PDF: ${errorText}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      return result;
     } catch (error) {
       console.error("Error uploading PDF:", error);
       throw error;
     }
   },
+
+  // Add a function to get PDF URL
+  getPdfUrl: (fileId: string) => {
+    return `/api/pdf/${fileId}`;
+  }
 };

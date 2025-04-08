@@ -2,7 +2,7 @@
 import React from "react";
 import { ChatMessage, Reference } from "@/types";
 import { cn } from "@/lib/utils";
-import { User, Bot } from "lucide-react";
+import { User, Bot, BookOpen } from "lucide-react";
 
 interface MessageProps {
   message: ChatMessage;
@@ -20,13 +20,13 @@ const Message: React.FC<MessageProps> = ({
 
   return (
     <div className={cn(
-      "flex w-full my-4",
+      "flex w-full",
       isUser ? "justify-end" : "justify-start"
     )}>
       {!isUser && (
         <div className="flex-shrink-0 mr-2">
-          <div className="flex items-center justify-center h-8 w-8 rounded-full bg-pdf-primary/20">
-            <Bot className="h-5 w-5 text-pdf-primary" />
+          <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted">
+            <Bot className="h-5 w-5 text-primary" />
           </div>
         </div>
       )}
@@ -44,14 +44,14 @@ const Message: React.FC<MessageProps> = ({
         {hasReferences && !isUser && (
           <button 
             onClick={onShowReferences}
-            className="text-xs text-pdf-primary mt-1 hover:underline flex items-center"
+            className="text-xs text-primary mt-2 hover:text-primary/80 hover:underline flex items-center"
           >
-            <span className="i-lucide-book-open mr-1 h-3 w-3" />
+            <BookOpen className="h-3 w-3 mr-1" />
             View {references.length} reference{references.length > 1 ? 's' : ''}
           </button>
         )}
         
-        <span className="text-xs text-gray-500 mt-1">
+        <span className="text-xs text-muted-foreground mt-1">
           {new Date(message.timestamp).toLocaleTimeString([], { 
             hour: '2-digit', 
             minute: '2-digit' 
@@ -61,7 +61,7 @@ const Message: React.FC<MessageProps> = ({
       
       {isUser && (
         <div className="flex-shrink-0 ml-2">
-          <div className="flex items-center justify-center h-8 w-8 rounded-full bg-pdf-primary">
+          <div className="flex items-center justify-center h-8 w-8 rounded-full bg-gradient-to-r from-primary to-secondary">
             <User className="h-5 w-5 text-white" />
           </div>
         </div>

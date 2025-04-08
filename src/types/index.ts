@@ -24,11 +24,10 @@ export interface FileInfo {
   id: string;
   name: string;
   size: number;
-  pages?: number;
   status: "uploading" | "indexing" | "indexed" | "error";
+  pages?: number;
   error?: string;
-  startPage?: number;
-  endPage?: number;
+  url?: string;
 }
 
 export interface GenerateRequest {

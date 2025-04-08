@@ -5,48 +5,50 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 240 70% 50%;
+    --primary: 252 95% 70%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 240 70% 80%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217 91% 60%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 215 27% 16%;
+    --muted-foreground: 217 10% 64%;
 
-    --accent: 220 70% 60%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 216 34% 17%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 70% 50%;
+    --border: 215 27% 16%;
+    --input: 215 27% 16%;
+    --ring: 252 95% 70%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
-    --sidebar-background: 240 10% 3.9%;
-    --sidebar-foreground: 240 5% 64.9%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 217 10% 64%;
+    --sidebar-primary: 215 27% 16%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 215 27% 16%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 215 27% 16%;
+    --sidebar-ring: 252 95% 70%;
   }
 
   body {
-    @apply bg-pdf-background text-pdf-text;
+    @apply bg-background text-foreground;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+    background-size: 40px 40px;
   }
   
   /* Custom scrollbar */
@@ -56,34 +58,59 @@
   }
   
   ::-webkit-scrollbar-track {
-    background: #2A2F3C;
+    background: hsl(var(--muted));
     border-radius: 10px;
   }
   
   ::-webkit-scrollbar-thumb {
-    background: #4A4F5C;
+    background: hsl(var(--primary) / 0.4);
     border-radius: 10px;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    background: #5A5F6C;
+    background: hsl(var(--primary) / 0.6);
   }
 }
 
 @layer components {
   .chat-bubble {
-    @apply rounded-2xl p-4 max-w-[85%] break-words;
+    @apply rounded-2xl p-4 max-w-[85%] break-words shadow-md;
   }
   
   .chat-bubble-user {
-    @apply chat-bubble bg-pdf-primary text-white ml-auto;
+    @apply chat-bubble bg-gradient-to-br from-primary/90 to-secondary/90 text-white ml-auto backdrop-blur-sm border border-white/10;
   }
   
   .chat-bubble-ai {
-    @apply chat-bubble bg-[#2A2F3C] border border-gray-700 shadow-md;
+    @apply chat-bubble bg-accent border border-border shadow-lg;
   }
   
   .reference-tag {
-    @apply inline-flex items-center text-xs font-medium rounded-full px-2.5 py-0.5 bg-pdf-secondary/20 text-pdf-primary;
+    @apply inline-flex items-center text-xs font-medium rounded-full px-2.5 py-0.5 bg-primary/20 text-primary;
+  }
+
+  .glass-card {
+    @apply bg-muted/60 backdrop-blur-md border border-white/10 rounded-xl shadow-xl;
+  }
+  
+  .upload-zone {
+    @apply border-2 border-dashed border-muted rounded-xl transition-all hover:border-primary/70 hover:bg-primary/5;
+  }
+  
+  .file-item {
+    @apply bg-accent/80 backdrop-blur-sm border border-white/10 rounded-lg shadow-md transition-all hover:shadow-lg hover:scale-[1.02];
+  }
+  
+  .tab-active {
+    @apply bg-muted text-foreground shadow-lg shadow-primary/20;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 }

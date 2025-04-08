@@ -1,26 +1,43 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { FileInfo } from "@/types";
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
-import { File, Upload, X, CheckCircle, AlertCircle } from "lucide-react";
+import { File, Upload, X, FileText } from "lucide-react";
 
 interface FileUploadProps {
   onFileUploaded: (file: FileInfo) => void;
+  // Add an active file prop to preserve state
+  activeFile?: FileInfo | null;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [startPage, setStartPage] = useState<number>(1);
-  const [endPage, setEndPage] = useState<number>(1);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clean up interval on unmount
+  useEffect(() => {
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+    };
+  }, []);
+
+  // Initialize upload status from active file if available
+  useEffect(() => {
+    if (activeFile?.status === "uploading") {
+      setIsUploading(true);
+      setUploadProgress(50); // Set a reasonable progress value
+    }
+  }, [activeFile]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -47,17 +64,9 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
       return;
     }
 
-    if (startPage > endPage) {
-      toast({
-        title: "Invalid page range",
-        description: "Start page cannot be greater than end page",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       setIsUploading(true);
+      setUploadProgress(0);
       
       // Create a unique ID for this upload
       const tempId = crypto.randomUUID();
@@ -67,184 +76,174 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
         id: tempId,
         name: selectedFile.name,
         size: selectedFile.size,
-        status: "uploading",
-        startPage,
-        endPage
+        status: "uploading"
       };
       
       onFileUploaded(tempFileInfo);
       
-      // Simulate progress for better UX
-      const progressInterval = setInterval(() => {
+      // Simulate initial progress
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+      
+      progressIntervalRef.current = setInterval(() => {
         setUploadProgress((prev) => {
-          if (prev >= 95) {
-            clearInterval(progressInterval);
-            return prev;
+          if (prev >= 90) {
+            if (progressIntervalRef.current) {
+              clearInterval(progressIntervalRef.current);
+            }
+            return 90;
           }
           return prev + 5;
         });
       }, 300);
 
-      try {
-        // Call the API to upload and index the PDF
-        const fileInfo = await api.uploadPdf(selectedFile, startPage, endPage);
-        
-        // Update with the returned info
-        const indexedFileInfo: FileInfo = {
-          id: tempId, // Keep the same ID to avoid duplicates
-          name: selectedFile.name,
-          size: selectedFile.size,
-          status: fileInfo.status,
-          pages: fileInfo.page_count,
-          startPage,
-          endPage,
-        };
-        
-        clearInterval(progressInterval);
-        setUploadProgress(100);
-        onFileUploaded(indexedFileInfo);
-        
-        toast({
-          title: "Upload complete",
-          description: "Your PDF has been successfully indexed",
-        });
-      } catch (error: any) {
-        // Handle API error
-        clearInterval(progressInterval);
-        
-        // Update file status to error
-        const errorFileInfo: FileInfo = {
-          id: tempId,
-          name: selectedFile.name,
-          size: selectedFile.size,
-          status: "error",
-          error: error.message || "Failed to upload file",
-          startPage,
-          endPage
-        };
-        
-        onFileUploaded(errorFileInfo);
-        
-        toast({
-          title: "Upload failed",
-          description: error.message || "An error occurred while uploading the PDF",
-          variant: "destructive",
-        });
-      }
+      // Call the API to upload and index the PDF
+      const result = await api.uploadPdf(selectedFile);
       
-      setIsUploading(false);
-      setSelectedFile(null);
-      setStartPage(1);
-      setEndPage(1);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+      // Clear the interval and set to 100%
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
       }
+      setUploadProgress(100);
+      
+      // Update with the completed info
+      const indexedFileInfo: FileInfo = {
+        id: tempId,
+        name: selectedFile.name,
+        size: selectedFile.size,
+        status: "indexed",
+        pages: result.page_count
+      };
+      
+      onFileUploaded(indexedFileInfo);
+      
+      toast({
+        title: "Upload complete",
+        description: "Your PDF has been successfully indexed",
+      });
+      
+      // Reset the form
+      setTimeout(() => {
+        setIsUploading(false);
+        setSelectedFile(null);
+        setUploadProgress(0);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      }, 1000);
       
     } catch (error: any) {
+      // Store a reference to the tempId created in the try block
+      // This ensures tempId is in scope even in the catch block
+      const errorTempId = crypto.randomUUID(); // Create a new ID for error case
+      
+      // Handle API error
+      setUploadProgress(0);
+      setIsUploading(false);
+      
+      // Update file status to error
+      const errorFileInfo: FileInfo = {
+        id: errorTempId,
+        name: selectedFile.name,
+        size: selectedFile.size,
+        status: "error",
+        error: error.message || "Failed to upload file"
+      };
+      
+      onFileUploaded(errorFileInfo);
+      
       toast({
         title: "Upload failed",
         description: error.message || "An error occurred while uploading the PDF",
         variant: "destructive",
       });
-      setIsUploading(false);
-      setUploadProgress(0);
+      
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      
+      // Clear the interval if it exists
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
     }
   };
 
-  return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="text-center text-pdf-primary">Upload PDF</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:border-pdf-primary transition-colors"
-          onClick={() => fileInputRef.current?.click()}>
-          <Upload className="h-10 w-10 text-gray-400 mb-2" />
-          <p className="text-sm text-gray-500">
-            {selectedFile ? selectedFile.name : "Click to select a PDF file"}
-          </p>
-          <Input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf"
-            className="hidden"
-            onChange={handleFileChange}
-            disabled={isUploading}
-          />
-        </div>
+  // Check if there is an active uploading file
+  const activeUploadingFile = activeFile?.status === "uploading";
 
-        {selectedFile && (
-          <div className="flex items-center justify-between bg-gray-50 p-2 rounded">
-            <div className="flex items-center">
-              <File className="h-5 w-5 text-pdf-primary mr-2" />
-              <span className="text-sm truncate max-w-[150px]">{selectedFile.name}</span>
-            </div>
+  return (
+    <div className="p-6">
+      <div 
+        className="upload-zone flex flex-col items-center justify-center p-8 cursor-pointer"
+        onClick={() => fileInputRef.current?.click()}
+      >
+        <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+          <Upload className="h-8 w-8 text-primary/70" />
+        </div>
+        <p className="text-foreground font-medium mb-1">
+          {activeUploadingFile ? activeFile?.name : selectedFile ? selectedFile.name : "Upload a PDF"}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {activeUploadingFile ? "Processing..." : "Click to browse your files"}
+        </p>
+        <Input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf"
+          className="hidden"
+          onChange={handleFileChange}
+          disabled={isUploading || activeUploadingFile}
+        />
+      </div>
+
+      {(selectedFile || activeUploadingFile) && (
+        <div className="mt-4 p-3 rounded-lg bg-accent/50 border border-border flex items-center">
+          <FileText className="h-5 w-5 text-primary mr-3" />
+          <span className="text-sm truncate flex-1">{activeUploadingFile ? activeFile?.name : selectedFile?.name}</span>
+          {!activeUploadingFile && (
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 setSelectedFile(null);
                 if (fileInputRef.current) {
                   fileInputRef.current.value = "";
                 }
               }}
               disabled={isUploading}
-              className="h-7 w-7"
+              className="h-7 w-7 rounded-full hover:bg-muted"
             >
               <X className="h-4 w-4" />
             </Button>
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label htmlFor="startPage" className="text-sm font-medium">
-              Start Page
-            </label>
-            <Input
-              id="startPage"
-              type="number"
-              min={1}
-              value={startPage}
-              onChange={(e) => setStartPage(parseInt(e.target.value) || 1)}
-              disabled={isUploading}
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="endPage" className="text-sm font-medium">
-              End Page
-            </label>
-            <Input
-              id="endPage"
-              type="number"
-              min={1}
-              value={endPage}
-              onChange={(e) => setEndPage(parseInt(e.target.value) || 1)}
-              disabled={isUploading}
-            />
-          </div>
+          )}
         </div>
+      )}
 
-        {isUploading && (
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>Uploading...</span>
+      <div className="mt-6 space-y-4">
+        {(isUploading || activeUploadingFile) && (
+          <div className="space-y-2 mt-4">
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Processing...</span>
               <span>{uploadProgress}%</span>
             </div>
             <Progress value={uploadProgress} className="h-2" />
           </div>
         )}
-      </CardContent>
-      <CardFooter>
+
         <Button 
-          className="w-full bg-pdf-primary hover:bg-pdf-primary/90"
+          className="w-full mt-6 bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-opacity"
           onClick={handleUpload}
-          disabled={!selectedFile || isUploading}
+          disabled={(!selectedFile && !activeUploadingFile) || isUploading || activeUploadingFile}
         >
-          {isUploading ? "Processing..." : "Upload and Index"}
+          {isUploading || activeUploadingFile ? "Processing..." : "Upload and Index"}
         </Button>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 };
 
