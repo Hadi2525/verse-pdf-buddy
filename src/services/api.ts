@@ -50,13 +50,13 @@ export const api = {
     }
   },
 
-  async uploadPdf(file: File, startPage: number, endPage: number): Promise<any> {
+  async uploadPdf(file: File): Promise<any> {
     try {
       const formData = new FormData();
       formData.append("file", file);
-
-      // Use URL parameters for starting_page and ending_page
-      const url = `${API_URL}/index-pdf?starting_page=${startPage}&ending_page=${endPage}`;
+      
+      // Upload the entire PDF without specifying page range
+      const url = `${API_URL}/index-pdf`;
       
       const response = await fetch(url, {
         method: "POST",

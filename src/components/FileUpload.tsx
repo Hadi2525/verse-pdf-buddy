@@ -16,8 +16,6 @@ interface FileUploadProps {
 
 const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [startPage, setStartPage] = useState<number>(1);
-  const [endPage, setEndPage] = useState<number>(1);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -66,15 +64,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
       return;
     }
 
-    if (startPage > endPage) {
-      toast({
-        title: "Invalid page range",
-        description: "Start page cannot be greater than end page",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       setIsUploading(true);
       setUploadProgress(0);
@@ -87,9 +76,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
         id: tempId,
         name: selectedFile.name,
         size: selectedFile.size,
-        status: "uploading",
-        startPage,
-        endPage
+        status: "uploading"
       };
       
       onFileUploaded(tempFileInfo);
@@ -112,7 +99,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
       }, 300);
 
       // Call the API to upload and index the PDF
-      const result = await api.uploadPdf(selectedFile, startPage, endPage);
+      const result = await api.uploadPdf(selectedFile);
       
       // Clear the interval and set to 100%
       if (progressIntervalRef.current) {
@@ -127,9 +114,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
         name: selectedFile.name,
         size: selectedFile.size,
         status: "indexed",
-        pages: result.page_count,
-        startPage,
-        endPage,
+        pages: result.page_count
       };
       
       onFileUploaded(indexedFileInfo);
@@ -143,8 +128,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
       setTimeout(() => {
         setIsUploading(false);
         setSelectedFile(null);
-        setStartPage(1);
-        setEndPage(1);
         setUploadProgress(0);
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
@@ -166,9 +149,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
         name: selectedFile.name,
         size: selectedFile.size,
         status: "error",
-        error: error.message || "Failed to upload file",
-        startPage,
-        endPage
+        error: error.message || "Failed to upload file"
       };
       
       onFileUploaded(errorFileInfo);
@@ -244,42 +225,6 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
       )}
 
       <div className="mt-6 space-y-4">
-        {!activeUploadingFile && (
-          <>
-            <div className="text-sm font-medium mb-2">Page Range</div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label htmlFor="startPage" className="text-sm text-muted-foreground">
-                  Start Page
-                </label>
-                <Input
-                  id="startPage"
-                  type="number"
-                  min={1}
-                  value={startPage}
-                  onChange={(e) => setStartPage(parseInt(e.target.value) || 1)}
-                  disabled={isUploading || activeUploadingFile}
-                  className="bg-muted/50 border-muted"
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="endPage" className="text-sm text-muted-foreground">
-                  End Page
-                </label>
-                <Input
-                  id="endPage"
-                  type="number"
-                  min={1}
-                  value={endPage}
-                  onChange={(e) => setEndPage(parseInt(e.target.value) || 1)}
-                  disabled={isUploading || activeUploadingFile}
-                  className="bg-muted/50 border-muted"
-                />
-              </div>
-            </div>
-          </>
-        )}
-
         {(isUploading || activeUploadingFile) && (
           <div className="space-y-2 mt-4">
             <div className="flex justify-between text-xs text-muted-foreground">
