@@ -2,7 +2,7 @@ quart
 quart-cors
 hypercorn
 google-genai
-PyPDF2==3.0.1
+PyPDF2==3.9.0
 pymongo
 python-dotenv
 ollama
