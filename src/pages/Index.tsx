@@ -1,15 +1,18 @@
-
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { FileInfo } from "@/types";
 import FileUpload from "@/components/FileUpload";
 import ChatInterface from "@/components/ChatInterface";
-import { File, CheckCircle, AlertCircle, Loader, FileText, Upload as UploadIcon } from "lucide-react";
+import { File, CheckCircle, AlertCircle, Loader, FileText, Upload as UploadIcon, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import PDFViewer from "@/components/PDFViewer";
 
 const Index = () => {
   const [files, setFiles] = useState<FileInfo[]>([]);
   const [activeTab, setActiveTab] = useState<string>("upload");
+  const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
+  const [isPdfDialogOpen, setIsPdfDialogOpen] = useState(false);
   
   // Find the currently uploading file (if any)
   const uploadingFile = files.find(file => file.status === "uploading");
@@ -78,6 +81,11 @@ const Index = () => {
       default:
         return "bg-gray-500/20 text-gray-300";
     }
+  };
+
+  const openPdfPreview = (file: FileInfo) => {
+    setSelectedFile(file);
+    setIsPdfDialogOpen(true);
   };
 
   const indexedFiles = files.filter(file => file.status === "indexed");
@@ -173,11 +181,23 @@ const Index = () => {
                                 )}
                               </div>
                             </div>
-                            <div className="flex-shrink-0 ml-2">
+                            <div className="flex-shrink-0 ml-2 flex items-center gap-2">
                               <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(file.status)}`}>
                                 {getStatusIcon(file.status)}
                                 <span className="ml-1">{getStatusText(file.status)}</span>
                               </div>
+                              
+                              {file.status === "indexed" && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  onClick={() => openPdfPreview(file)}
+                                  className="h-7 w-7 rounded-full hover:bg-muted"
+                                  title="Preview PDF"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              )}
                             </div>
                           </div>
                           {file.error && (
@@ -199,6 +219,13 @@ const Index = () => {
           </div>
         </div>
       </div>
+      
+      {/* PDF Viewer Dialog */}
+      <PDFViewer 
+        file={selectedFile} 
+        isOpen={isPdfDialogOpen} 
+        onOpenChange={setIsPdfDialogOpen} 
+      />
     </div>
   );
 };

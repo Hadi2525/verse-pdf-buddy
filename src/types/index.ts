@@ -1,4 +1,3 @@
-
 export interface Message {
   role: "user" | "assistant" | "system";
   content: string;
@@ -24,11 +23,12 @@ export interface FileInfo {
   id: string;
   name: string;
   size: number;
-  pages?: number;
   status: "uploading" | "indexing" | "indexed" | "error";
-  error?: string;
+  pages?: number;
   startPage?: number;
   endPage?: number;
+  error?: string;
+  url?: string;
 }
 
 export interface GenerateRequest {

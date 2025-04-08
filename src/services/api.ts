@@ -1,4 +1,3 @@
-
 import { GenerateRequest, FileInfo, APIResponse } from "../types";
 
 // Configure your backend URL here
@@ -76,4 +75,9 @@ export const api = {
       throw error;
     }
   },
+
+  // Add a function to get PDF URL
+  getPdfUrl: (fileId: string) => {
+    return `/api/pdf/${fileId}`;
+  }
 };
