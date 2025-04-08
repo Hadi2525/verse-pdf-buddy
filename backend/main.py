@@ -113,16 +113,10 @@ async def insert_doc(document: Dict):
 
 @app.post("/index-pdf")
 async def index_documents(
-    file: UploadFile = File(...),
-    starting_page: int = 1,
-    ending_page: int = 1
+    file: UploadFile = File(...)
 ):
     try:
-        # Validate parameters
-        if starting_page < 1:
-            raise HTTPException(status_code=400, detail="starting_page must be >= 1")
-        if ending_page < 1:
-            raise HTTPException(status_code=400, detail="ending_page must be >= 1")
+        vector_db.clean_collection()
         
         # Check file format
         if not file.filename.endswith(".pdf"):
@@ -132,8 +126,8 @@ async def index_documents(
         pdf_bytes = await file.read()
         pdf_pages_in_bytes = get_pdf_in_bytes(pdf_bytes)
         
-        # Process pages
-        for page_number, page in enumerate(pdf_pages_in_bytes[starting_page-1:ending_page+1], start=starting_page):
+        # Process all pages
+        for page_number, page in enumerate(pdf_pages_in_bytes, start=1):
             page_in_json = read_from_pdf_in_bytes(
                 page=page,
                 google_client=google_client,

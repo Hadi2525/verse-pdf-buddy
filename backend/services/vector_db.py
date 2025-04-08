@@ -71,6 +71,15 @@ class VectorDB:
         ]
         
         return list(self.collection.aggregate(pipeline))
+    
+    def clean_collection(self):
+        """
+        Clean the MongoDB collection
+        """
+        if self.collection.count_documents({}) != 0:
+            self.collection.delete_many({})
+            return True
+        return False
 
     #TODO: Implement update and delete methods
     # def update(self, query, data):
