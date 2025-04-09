@@ -1,10 +1,12 @@
-
 import { GenerateRequest, FileInfo, APIResponse } from "../types";
 
 // Configure your backend URL here
 const API_URL = "http://localhost:8000"; // Change this to your actual backend URL
 
 export const api = {
+  // Add a method to get the base URL
+  getBaseUrl: () => API_URL,
+  
   async generateResponse(request: GenerateRequest): Promise<APIResponse> {
     try {
       const response = await fetch(`${API_URL}/generate-response`, {
@@ -77,9 +79,9 @@ export const api = {
     }
   },
 
-  // Update PDF URL function to use file_id for MongoDB
+  // Update PDF URL function to use API_URL
   getPdfUrl: (fileId: string) => {
-    return `/preview-pdf/${fileId}`;
+    return `${API_URL}/preview-pdf/${fileId}`;
   },
   
   // Add a function to delete a PDF file

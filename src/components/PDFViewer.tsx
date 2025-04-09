@@ -3,6 +3,7 @@ import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FileInfo } from "@/types";
 import { Loader } from "lucide-react";
+import { api } from "@/services/api";
 
 interface PDFViewerProps {
   file: FileInfo | null;
@@ -13,8 +14,8 @@ interface PDFViewerProps {
 const PDFViewer: React.FC<PDFViewerProps> = ({ file, isOpen, onOpenChange }) => {
   const [isLoading, setIsLoading] = React.useState(true);
 
-  // Construct the PDF URL using the file_id from the MongoDB
-  const pdfUrl = file?.file_id ? `/preview-pdf/${file.file_id}` : "";
+  // Construct the PDF URL using the file_id from the MongoDB and the API base URL
+  const pdfUrl = file?.file_id ? `${api.getBaseUrl()}/preview-pdf/${file.file_id}` : "";
   
   const handleLoad = () => {
     setIsLoading(false);
