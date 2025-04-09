@@ -28,6 +28,7 @@ export interface FileInfo {
   pages?: number;
   error?: string;
   url?: string;
+  progress?: number; // Added progress field for tracking upload/indexing progress
 }
 
 export interface GenerateRequest {

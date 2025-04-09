@@ -1,3 +1,4 @@
+
 import { GenerateRequest, FileInfo, APIResponse } from "../types";
 
 // Configure your backend URL here
@@ -79,5 +80,18 @@ export const api = {
   // Add a function to get PDF URL
   getPdfUrl: (fileId: string) => {
     return `/api/pdf/${fileId}`;
+  },
+  
+  // Add a function to delete a PDF file
+  async deleteFile(fileId: string): Promise<boolean> {
+    try {
+      // In a real implementation, this would call an API endpoint
+      // For now we're just returning success
+      console.log(`File ${fileId} would be deleted on the server`);
+      return true;
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      throw error;
+    }
   }
 };

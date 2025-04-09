@@ -21,6 +21,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const tempFileIdRef = useRef<string>("");
 
   // Clean up interval on unmount
   useEffect(() => {
@@ -35,7 +36,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
   useEffect(() => {
     if (activeFile?.status === "uploading") {
       setIsUploading(true);
-      setUploadProgress(50); // Set a reasonable progress value
+      setUploadProgress(activeFile.progress || 50); // Use progress from file or default to 50
     }
   }, [activeFile]);
 
@@ -51,6 +52,23 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
         return;
       }
       setSelectedFile(file);
+    }
+  };
+
+  const updateProgress = (progress: number) => {
+    setUploadProgress(progress);
+    
+    // Update the file info with progress
+    if (tempFileIdRef.current) {
+      const tempFileInfo: FileInfo = {
+        id: tempFileIdRef.current,
+        name: selectedFile?.name || "",
+        size: selectedFile?.size || 0,
+        status: progress < 100 ? "uploading" : "indexing",
+        progress: progress
+      };
+      
+      onFileUploaded(tempFileInfo);
     }
   };
 
@@ -70,74 +88,114 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
       
       // Create a unique ID for this upload
       const tempId = crypto.randomUUID();
+      tempFileIdRef.current = tempId;
       
       // Create a temporary file info to show in the UI
       const tempFileInfo: FileInfo = {
         id: tempId,
         name: selectedFile.name,
         size: selectedFile.size,
-        status: "uploading"
+        status: "uploading",
+        progress: 0
       };
       
       onFileUploaded(tempFileInfo);
       
-      // Simulate initial progress
+      // Start the realistic progress tracking
+      let currentProgress = 0;
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
       }
       
+      // Simulate upload progress (0-90%)
       progressIntervalRef.current = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            if (progressIntervalRef.current) {
-              clearInterval(progressIntervalRef.current);
-            }
-            return 90;
-          }
-          return prev + 5;
-        });
+        currentProgress += 5;
+        if (currentProgress > 90) {
+          clearInterval(progressIntervalRef.current!);
+          currentProgress = 90;
+        }
+        
+        updateProgress(currentProgress);
       }, 300);
 
       // Call the API to upload and index the PDF
       const result = await api.uploadPdf(selectedFile);
       
-      // Clear the interval and set to 100%
+      // Clear the interval and set to 100% to indicate upload is complete
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
       }
-      setUploadProgress(100);
       
-      // Update with the completed info
-      const indexedFileInfo: FileInfo = {
+      updateProgress(100);
+      
+      // Now simulate indexing progress (going from 0-100% again but with indexing status)
+      const indexingFileInfo: FileInfo = {
         id: tempId,
         name: selectedFile.name,
         size: selectedFile.size,
-        status: "indexed",
-        pages: result.page_count
+        status: "indexing",
+        progress: 0
       };
+      onFileUploaded(indexingFileInfo);
       
-      onFileUploaded(indexedFileInfo);
-      
-      toast({
-        title: "Upload complete",
-        description: "Your PDF has been successfully indexed",
-      });
-      
-      // Reset the form
-      setTimeout(() => {
-        setIsUploading(false);
-        setSelectedFile(null);
-        setUploadProgress(0);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
+      // Simulate indexing progress
+      currentProgress = 0;
+      progressIntervalRef.current = setInterval(() => {
+        currentProgress += 5;
+        if (currentProgress >= 100) {
+          clearInterval(progressIntervalRef.current!);
+          
+          // Update with the completed info
+          const indexedFileInfo: FileInfo = {
+            id: tempId,
+            name: selectedFile.name,
+            size: selectedFile.size,
+            status: "indexed",
+            pages: result.page_count,
+            progress: 100
+          };
+          
+          onFileUploaded(indexedFileInfo);
+          
+          toast({
+            title: "Upload complete",
+            description: "Your PDF has been successfully indexed",
+          });
+          
+          // Reset the form
+          setTimeout(() => {
+            setIsUploading(false);
+            setSelectedFile(null);
+            setUploadProgress(0);
+            if (fileInputRef.current) {
+              fileInputRef.current.value = "";
+            }
+          }, 1000);
+          
+          return;
         }
-      }, 1000);
+        
+        const indexingUpdate: FileInfo = {
+          id: tempId,
+          name: selectedFile.name,
+          size: selectedFile.size,
+          status: "indexing",
+          progress: currentProgress
+        };
+        
+        onFileUploaded(indexingUpdate);
+      }, 200);
       
     } catch (error: any) {
-      // Store a reference to the tempId created in the try block
-      // This ensures tempId is in scope even in the catch block
-      const errorTempId = crypto.randomUUID(); // Create a new ID for error case
+      // Clear the interval if it exists
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      
+      // Store a reference to the tempId
+      const errorTempId = tempFileIdRef.current || crypto.randomUUID();
       
       // Handle API error
       setUploadProgress(0);
@@ -149,7 +207,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
         name: selectedFile.name,
         size: selectedFile.size,
         status: "error",
-        error: error.message || "Failed to upload file"
+        error: error.message || "Failed to upload file",
+        progress: 0
       };
       
       onFileUploaded(errorFileInfo);
@@ -163,17 +222,11 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-      
-      // Clear the interval if it exists
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-        progressIntervalRef.current = null;
-      }
     }
   };
 
   // Check if there is an active uploading file
-  const activeUploadingFile = activeFile?.status === "uploading";
+  const activeUploadingFile = activeFile?.status === "uploading" || activeFile?.status === "indexing";
 
   return (
     <div className="p-6">
@@ -228,7 +281,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
         {(isUploading || activeUploadingFile) && (
           <div className="space-y-2 mt-4">
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Processing...</span>
+              <span>{activeFile?.status === "indexing" ? "Indexing..." : "Uploading..."}</span>
               <span>{uploadProgress}%</span>
             </div>
             <Progress value={uploadProgress} className="h-2" />

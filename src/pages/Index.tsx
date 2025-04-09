@@ -1,19 +1,20 @@
-
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { FileInfo } from "@/types";
 import FileUpload from "@/components/FileUpload";
 import ChatInterface from "@/components/ChatInterface";
-import { File, CheckCircle, AlertCircle, Loader, FileText, Upload as UploadIcon, Eye } from "lucide-react";
+import { File, CheckCircle, AlertCircle, Loader, FileText, Upload as UploadIcon, Eye, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PDFViewer from "@/components/PDFViewer";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [files, setFiles] = useState<FileInfo[]>([]);
   const [activeTab, setActiveTab] = useState<string>("upload");
   const [selectedFile, setSelectedFile] = useState<FileInfo | null>(null);
   const [isPdfDialogOpen, setIsPdfDialogOpen] = useState(false);
+  const { toast } = useToast();
   
   // Find the currently uploading file (if any)
   const uploadingFile = files.find(file => file.status === "uploading");
@@ -37,6 +38,23 @@ const Index = () => {
       // Add the new file
       setFiles([...files, newFile]);
     }
+  };
+
+  const handleFileDelete = (fileId: string) => {
+    // Remove the file from the state
+    setFiles(files.filter(file => file.id !== fileId));
+    
+    // If the deleted file is currently selected in the PDF viewer, close the viewer
+    if (selectedFile && selectedFile.id === fileId) {
+      setIsPdfDialogOpen(false);
+      setSelectedFile(null);
+    }
+    
+    // Show toast notification
+    toast({
+      title: "File removed",
+      description: "The file has been removed from your list"
+    });
   };
 
   const getStatusIcon = (status: FileInfo["status"]) => {
@@ -180,22 +198,58 @@ const Index = () => {
                                 <span className="ml-1">{getStatusText(file.status)}</span>
                               </div>
                               
-                              {file.status === "indexed" && (
+                              <div className="flex">
+                                {file.status === "indexed" && (
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    onClick={() => openPdfPreview(file)}
+                                    className="h-7 w-7 rounded-full hover:bg-muted"
+                                    title="Preview PDF"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                )}
+                                
                                 <Button 
                                   variant="ghost" 
                                   size="icon" 
-                                  onClick={() => openPdfPreview(file)}
-                                  className="h-7 w-7 rounded-full hover:bg-muted"
-                                  title="Preview PDF"
+                                  onClick={() => handleFileDelete(file.id)}
+                                  className="h-7 w-7 rounded-full hover:bg-muted hover:text-destructive"
+                                  title="Remove file"
                                 >
-                                  <Eye className="h-4 w-4" />
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
-                              )}
+                              </div>
                             </div>
                           </div>
                           {file.error && (
                             <div className="mt-2 text-xs text-red-300 bg-red-500/10 p-2 rounded-md">
                               Error: {file.error}
+                            </div>
+                          )}
+                          
+                          {file.status === "uploading" && (
+                            <div className="mt-3 space-y-2">
+                              <div className="bg-primary/10 rounded-full h-2 overflow-hidden">
+                                <div className="bg-primary h-full loading-bar" style={{ width: `${file.progress || 0}%` }}></div>
+                              </div>
+                              <div className="flex justify-between text-xs text-muted-foreground">
+                                <span>Uploading...</span>
+                                <span>{file.progress || 0}%</span>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {file.status === "indexing" && (
+                            <div className="mt-3 space-y-2">
+                              <div className="bg-yellow-500/10 rounded-full h-2 overflow-hidden">
+                                <div className="bg-yellow-500 h-full loading-bar" style={{ width: `${file.progress || 0}%` }}></div>
+                              </div>
+                              <div className="flex justify-between text-xs text-muted-foreground">
+                                <span>Indexing...</span>
+                                <span>{file.progress || 0}%</span>
+                              </div>
                             </div>
                           )}
                         </li>

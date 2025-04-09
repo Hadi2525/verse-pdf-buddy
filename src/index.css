@@ -5,112 +5,103 @@
 
 @layer base {
   :root {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
-
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 252 95% 70%;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
-
-    --secondary: 217 91% 60%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 215 27% 16%;
-    --muted-foreground: 217 10% 64%;
-
-    --accent: 216 34% 17%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 84% 60%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
-    --border: 215 27% 16%;
-    --input: 215 27% 16%;
-    --ring: 252 95% 70%;
-
-    --radius: 1rem;
-
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 217 10% 64%;
-    --sidebar-primary: 215 27% 16%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 215 27% 16%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 215 27% 16%;
-    --sidebar-ring: 252 95% 70%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.75rem;
   }
 
-  body {
-    @apply bg-background text-foreground;
-    background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
-    background-size: 40px 40px;
-  }
-  
-  /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  
-  ::-webkit-scrollbar-track {
-    background: hsl(var(--muted));
-    border-radius: 10px;
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 0.4);
-    border-radius: 10px;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--primary) / 0.6);
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9;
   }
 }
 
-@layer components {
-  .chat-bubble {
-    @apply rounded-2xl p-4 max-w-[85%] break-words shadow-md;
+@layer base {
+  * {
+    @apply border-border;
   }
-  
-  .chat-bubble-user {
-    @apply chat-bubble bg-gradient-to-br from-primary/90 to-secondary/90 text-white ml-auto backdrop-blur-sm border border-white/10;
+  body {
+    @apply bg-background text-foreground;
   }
-  
-  .chat-bubble-ai {
-    @apply chat-bubble bg-accent border border-border shadow-lg;
-  }
-  
-  .reference-tag {
-    @apply inline-flex items-center text-xs font-medium rounded-full px-2.5 py-0.5 bg-primary/20 text-primary;
-  }
+}
 
-  .glass-card {
-    @apply bg-muted/60 backdrop-blur-md border border-white/10 rounded-xl shadow-xl;
+.glass-card {
+  @apply bg-background/95 backdrop-blur-sm border border-border rounded-xl shadow-lg;
+}
+
+.data-\[state\=active\]\:tab-active {
+  @apply data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm;
+}
+
+.chat-message-user {
+  @apply bg-accent/40;
+}
+
+.chat-message-assistant {
+  @apply bg-background border-l-4 border-primary;
+}
+
+.references-card {
+  @apply border border-border bg-background/80 backdrop-blur-sm rounded-lg p-4;
+}
+
+.file-item {
+  @apply rounded-lg border border-border bg-accent/10 backdrop-blur-sm hover:bg-accent/20 transition-colors;
+}
+
+.upload-zone {
+  @apply border-2 border-dashed border-border rounded-xl bg-accent/10 hover:bg-accent/20 transition-colors;
+}
+
+/* Animation for the loading bar */
+@keyframes loading-progress {
+  0% {
+    background-position: 0% 50%;
   }
-  
-  .upload-zone {
-    @apply border-2 border-dashed border-muted rounded-xl transition-all hover:border-primary/70 hover:bg-primary/5;
+  50% {
+    background-position: 100% 50%;
   }
-  
-  .file-item {
-    @apply bg-accent/80 backdrop-blur-sm border border-white/10 rounded-lg shadow-md transition-all hover:shadow-lg hover:scale-[1.02];
+  100% {
+    background-position: 0% 50%;
   }
-  
-  .tab-active {
-    @apply bg-muted text-foreground shadow-lg shadow-primary/20;
-  }
-  
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+}
+
+.loading-bar {
+  background: linear-gradient(90deg, rgba(var(--primary), 0.8), rgba(var(--primary), 1), rgba(var(--primary), 0.8));
+  background-size: 200% 100%;
+  animation: loading-progress 2s infinite;
 }
