@@ -77,9 +77,9 @@ export const api = {
     }
   },
 
-  // Add a function to get PDF URL
+  // Update PDF URL function to use file_id for MongoDB
   getPdfUrl: (fileId: string) => {
-    return `/api/pdf/${fileId}`;
+    return `/preview-pdf/${fileId}`;
   },
   
   // Add a function to delete a PDF file

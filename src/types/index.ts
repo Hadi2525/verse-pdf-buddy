@@ -29,6 +29,7 @@ export interface FileInfo {
   error?: string;
   url?: string;
   progress?: number; // Added progress field for tracking upload/indexing progress
+  file_id?: string; // Added file_id field for MongoDB ObjectId
 }
 
 export interface GenerateRequest {

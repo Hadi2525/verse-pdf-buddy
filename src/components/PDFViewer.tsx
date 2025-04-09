@@ -13,8 +13,8 @@ interface PDFViewerProps {
 const PDFViewer: React.FC<PDFViewerProps> = ({ file, isOpen, onOpenChange }) => {
   const [isLoading, setIsLoading] = React.useState(true);
 
-  // Construct the PDF URL - we're assuming the PDFs are accessible from the server
-  const pdfUrl = file ? `/api/pdf/${file.id}` : "";
+  // Construct the PDF URL using the file_id from the MongoDB
+  const pdfUrl = file?.file_id ? `/preview-pdf/${file.file_id}` : "";
   
   const handleLoad = () => {
     setIsLoading(false);
@@ -45,7 +45,7 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ file, isOpen, onOpenChange }) => 
           
           {file && (
             <iframe 
-              src={`https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`}
+              src={pdfUrl}
               className="w-full h-full"
               onLoad={handleLoad}
               title={`PDF preview: ${file.name}`}
