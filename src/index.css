@@ -6,33 +6,33 @@
 @layer base {
   :root {
     --background: 220 20% 8%;
-    --foreground: 220 10% 97%;
+    --foreground: 220 10% 98%; /* Increased brightness for better contrast */
     --card: 220 25% 12%;
-    --card-foreground: 220 10% 97%;
+    --card-foreground: 220 10% 98%; /* Increased brightness */
     --popover: 220 25% 12%;
-    --popover-foreground: 220 10% 97%;
-    --primary: 140 50% 45%;
-    --primary-foreground: 220 10% 97%;
+    --popover-foreground: 220 10% 98%; /* Increased brightness */
+    --primary: 140 55% 50%; /* Increased saturation and brightness */
+    --primary-foreground: 220 10% 98%; /* Increased brightness */
     --secondary: 220 20% 16%;
-    --secondary-foreground: 220 10% 97%;
+    --secondary-foreground: 220 10% 98%; /* Increased brightness */
     --muted: 220 20% 16%;
-    --muted-foreground: 220 20% 70%;
-    --accent: 140 30% 20%;
-    --accent-foreground: 220 10% 97%;
-    --destructive: 0 62.8% 50.6%;
-    --destructive-foreground: 220 10% 97%;
-    --border: 220 20% 20%;
-    --input: 220 20% 20%;
-    --ring: 140 50% 45%;
+    --muted-foreground: 220 20% 85%; /* Increased brightness for better readability */
+    --accent: 140 40% 30%; /* Increased saturation */
+    --accent-foreground: 220 10% 98%; /* Increased brightness */
+    --destructive: 0 70% 60%; /* Increased saturation and brightness */
+    --destructive-foreground: 220 10% 98%; /* Increased brightness */
+    --border: 220 20% 25%; /* Slightly brighter borders */
+    --input: 220 20% 25%; /* Slightly brighter inputs */
+    --ring: 140 60% 55%; /* Brighter ring */
     --radius: .75rem;
     --sidebar-background: 220 20% 12%;
-    --sidebar-foreground: 220 10% 97%;
-    --sidebar-primary: 140 50% 45%;
-    --sidebar-primary-foreground: 220 10% 97%;
+    --sidebar-foreground: 220 10% 98%; /* Increased brightness */
+    --sidebar-primary: 140 60% 50%; /* Brighter sidebar primary */
+    --sidebar-primary-foreground: 220 10% 98%; /* Increased brightness */
     --sidebar-accent: 220 20% 16%;
-    --sidebar-accent-foreground: 220 10% 97%;
-    --sidebar-border: 220 20% 20%;
-    --sidebar-ring: 140 50% 45%;
+    --sidebar-accent-foreground: 220 10% 98%; /* Increased brightness */
+    --sidebar-border: 220 20% 25%; /* Slightly brighter borders */
+    --sidebar-ring: 140 60% 55%; /* Brighter ring */
   }
 
   .light {
@@ -69,8 +69,18 @@
   }
 }
 
+/* Enhancing standard elements for better visibility */
+a {
+  @apply text-primary hover:text-primary-foreground transition-colors font-medium;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply text-foreground font-bold;
+}
+
+/* Update existing classes for better contrast */
 .glass-card {
-  @apply bg-background/95 backdrop-blur-sm border border-border rounded-xl shadow-lg;
+  @apply bg-background/95 backdrop-blur-sm border border-border/80 rounded-xl shadow-lg;
 }
 
 .data-\[state\=active\]\:tab-active {
@@ -78,23 +88,36 @@
 }
 
 .chat-message-user {
-  @apply bg-accent/40;
+  @apply bg-accent/50; /* Increased opacity for better visibility */
 }
 
 .chat-message-assistant {
-  @apply bg-background border-l-4 border-primary;
+  @apply bg-background border-l-4 border-primary/90; /* More visible border */
 }
 
 .references-card {
-  @apply border border-border bg-background/80 backdrop-blur-sm rounded-lg p-4;
+  @apply border border-border/80 bg-background/90 backdrop-blur-sm rounded-lg p-4;
+}
+
+.reference-tag {
+  @apply inline-block px-2 py-0.5 bg-primary/20 text-primary-foreground rounded text-xs font-medium;
 }
 
 .file-item {
-  @apply rounded-lg border border-border bg-accent/10 backdrop-blur-sm hover:bg-accent/20 transition-colors;
+  @apply rounded-lg border border-border/80 bg-accent/20 backdrop-blur-sm hover:bg-accent/30 transition-colors;
 }
 
 .upload-zone {
-  @apply border-2 border-dashed border-border rounded-xl bg-accent/10 hover:bg-accent/20 transition-colors;
+  @apply border-2 border-dashed border-border/90 rounded-xl bg-accent/20 hover:bg-accent/30 transition-colors;
+}
+
+/* Chat bubble styles with better visibility */
+.chat-bubble-user {
+  @apply bg-accent/50 px-4 py-2 rounded-lg max-w-lg text-foreground;
+}
+
+.chat-bubble-ai {
+  @apply bg-background px-4 py-2 border-l-4 border-primary/90 rounded-lg max-w-lg text-foreground;
 }
 
 /* Animation for the loading bar */
@@ -111,7 +134,7 @@
 }
 
 .loading-bar {
-  background: linear-gradient(90deg, rgba(var(--primary), 0.8), rgba(var(--primary), 1), rgba(var(--primary), 0.8));
+  background: linear-gradient(90deg, rgba(var(--primary), 0.9), rgba(var(--primary), 1), rgba(var(--primary), 0.9));
   background-size: 200% 100%;
   animation: loading-progress 2s infinite;
 }
