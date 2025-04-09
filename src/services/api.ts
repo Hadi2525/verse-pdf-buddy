@@ -1,7 +1,7 @@
 import { GenerateRequest, APIResponse } from "../types";
 
 // Get the base URL from environment variable with fallback
-const API_URL = import.meta.env.VITE_API_URL || "http://0.0.0.0:8080";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 export const api = {
   getBaseUrl: () => API_URL,

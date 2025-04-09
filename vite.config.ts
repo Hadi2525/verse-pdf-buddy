@@ -22,7 +22,7 @@ export default defineConfig(({ command }) => {
     },
     define: {
       // Expose environment variables to the client-side
-      "import.meta.env.VITE_API_URL": JSON.stringify(process.env.VITE_API_URL || "http://0.0.0.0:8080"),
+      "import.meta.env.VITE_API_URL": JSON.stringify(process.env.VITE_API_URL || "http://localhost:8080"),
     },
     base,  // Use the dynamically set base
   };
