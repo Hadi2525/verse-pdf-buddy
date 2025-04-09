@@ -65,9 +65,9 @@ export default {
 				},
 				google: {
 					blue: '#4285F4',
-					red: '#DB4437',
-					yellow: '#F4B400',
-					green: '#0F9D58'
+					red: '#EA4335',
+					yellow: '#FBBC05',
+					green: '#34A853'
 				}
 			},
 			borderRadius: {

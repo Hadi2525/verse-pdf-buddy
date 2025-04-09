@@ -5,55 +5,33 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 210 90% 50%; /* Google blue */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 214 90% 50%; /* Google blue */
     --primary-foreground: 0 0% 100%;
     --secondary: 0 90% 50%; /* Google red */
     --secondary-foreground: 0 0% 100%;
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 84.9%;
     --accent: 120 90% 40%; /* Google green */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 210 90% 50%;
-    --radius: 0.5rem; /* More Google-like radius */
-  }
-
-  .dark {
-    --background: 20 14% 98%;
-    --foreground: 220 10% 3.9%;
-    --card: 240 10% 100%;
-    --card-foreground: 220 10% 3.9%;
-    --popover: 240 10% 100%;
-    --popover-foreground: 220 10% 3.9%;
-    --primary: 210 90% 50%; /* Google blue */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 90% 50%; /* Google red */
-    --secondary-foreground: 0 0% 100%;
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
-    --accent: 120 90% 40%; /* Google green */
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 210 90% 50%;
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 10% 3.9%;
-    --sidebar-primary: 210 90% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 96%;
-    --sidebar-accent-foreground: 240 5% 34%;
-    --sidebar-border: 240 6% 90%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 214 90% 50%;
+    --radius: 0.5rem;
+    --sidebar-background: 240 10% 3.9%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 214 90% 50%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 5% 84.9%;
+    --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 240 5% 64.9%;
   }
 }
@@ -65,59 +43,59 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Arial', sans-serif; /* Google uses Arial or Product Sans */
-    background-image: none; /* Remove the pattern background */
+    background-color: #121212; /* Dark background */
   }
 }
 
-/* Enhancing standard elements for better visibility */
+/* Enhancing standard elements for better visibility in dark mode */
 a {
-  @apply text-primary hover:text-blue-700 transition-colors font-medium;
+  @apply text-primary hover:text-blue-400 transition-colors font-medium;
 }
 
 h1, h2, h3, h4, h5, h6 {
   @apply text-foreground font-bold;
 }
 
-/* Update existing classes for better contrast */
+/* Update existing classes for better contrast in dark mode */
 .glass-card {
-  @apply bg-white shadow-md border border-gray-100 rounded-lg;
+  @apply bg-[#1a1a1a] shadow-md border border-[#333] rounded-lg;
 }
 
 .data-\[state\=active\]\:tab-active {
-  @apply data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm;
+  @apply data-[state=active]:bg-[#222] data-[state=active]:text-primary data-[state=active]:shadow-sm;
 }
 
 .chat-message-user {
-  @apply bg-blue-50;
+  @apply bg-[#2a2a2a];
 }
 
 .chat-message-assistant {
-  @apply bg-white border-l-4 border-primary;
+  @apply bg-[#1a1a1a] border-l-4 border-primary;
 }
 
 .references-card {
-  @apply border border-gray-100 bg-white rounded-lg p-4 shadow-sm;
+  @apply border border-[#333] bg-[#1a1a1a] rounded-lg p-4 shadow-sm;
 }
 
 .reference-tag {
-  @apply inline-block px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium;
+  @apply inline-block px-2 py-0.5 bg-blue-900/50 text-blue-300 rounded text-xs font-medium;
 }
 
 .file-item {
-  @apply rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors shadow-sm;
+  @apply rounded-lg border border-[#333] bg-[#1a1a1a] hover:bg-[#222] transition-colors shadow-sm;
 }
 
 .upload-zone {
-  @apply border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors;
+  @apply border-2 border-dashed border-[#444] rounded-lg bg-[#222] hover:bg-[#2a2a2a] transition-colors;
 }
 
-/* Chat bubble styles with better visibility */
+/* Chat bubble styles with better visibility for dark mode */
 .chat-bubble-user {
-  @apply bg-blue-50 px-4 py-2 rounded-lg max-w-lg text-gray-800;
+  @apply bg-[#2a2a2a] px-4 py-2 rounded-lg max-w-lg text-gray-100;
 }
 
 .chat-bubble-ai {
-  @apply bg-white px-4 py-2 border-l-4 border-primary rounded-lg max-w-lg text-gray-800;
+  @apply bg-[#1a1a1a] px-4 py-2 border-l-4 border-primary rounded-lg max-w-lg text-gray-100;
 }
 
 /* Animation for the loading bar */
@@ -134,7 +112,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .loading-bar {
-  background: linear-gradient(90deg, rgba(66, 133, 244, 0.9), rgba(66, 133, 244, 1), rgba(66, 133, 244, 0.9));
+  background: linear-gradient(90deg, rgba(66, 133, 244, 0.7), rgba(66, 133, 244, 0.9), rgba(66, 133, 244, 0.7));
   background-size: 200% 100%;
   animation: loading-progress 2s infinite;
 }
