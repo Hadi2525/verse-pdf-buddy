@@ -25,7 +25,9 @@ export default defineConfig(({ command, mode }) => {
     },
     define: {
       // Expose environment variables to the client-side
-      "import.meta.env.VITE_API_URL": JSON.stringify(process.env.VITE_API_URL || "http://localhost:8080"),
+      // Use process.env with fallback for compatibility
+      "import.meta.env.VITE_API_URL": JSON.stringify(process.env.VITE_API_URL || ""),
+      "import.meta.env.PROD": mode === 'production',
     },
     base,  // Use the dynamically set base
   };

@@ -1,14 +1,36 @@
+
 import { GenerateRequest, APIResponse } from "../types";
 
-// Get the base URL from environment variable with fallback
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+// Function to determine the correct API URL based on the environment
+function determineApiUrl() {
+  // Get the base URL from environment variable with fallback
+  const configuredUrl = import.meta.env.VITE_API_URL;
+  
+  // If explicitly configured, use that
+  if (configuredUrl) {
+    return configuredUrl;
+  }
+  
+  // In production/Docker, if we're running from the same server, use relative URLs
+  // This ensures API requests go to the same host that served the frontend
+  if (import.meta.env.PROD) {
+    return '';
+  }
+  
+  // For local development, fallback to localhost
+  return "http://localhost:8080";
+}
+
+// Get the base URL according to our environment
+const API_URL = determineApiUrl();
 
 export const api = {
   getBaseUrl: () => API_URL,
   
   async generateResponse(request: GenerateRequest): Promise<APIResponse> {
     try {
-      const response = await fetch(`${API_URL}/generate-response`, {
+      const url = API_URL ? `${API_URL}/generate-response` : '/generate-response';
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -30,15 +52,16 @@ export const api = {
 
   async findReferences(query: string, top_searches: number = 5): Promise<any> {
     try {
-      const response = await fetch(
-        `${API_URL}/find?query=${encodeURIComponent(query)}&top_searches=${top_searches}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const url = API_URL 
+        ? `${API_URL}/find?query=${encodeURIComponent(query)}&top_searches=${top_searches}`
+        : `/find?query=${encodeURIComponent(query)}&top_searches=${top_searches}`;
+        
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -57,7 +80,9 @@ export const api = {
       const formData = new FormData();
       formData.append("file", file);
       
-      const url = `${API_URL}/index-pdf`;
+      const url = API_URL ? `${API_URL}/index-pdf` : '/index-pdf';
+      
+      console.log("Uploading PDF to URL:", url);
       
       const response = await fetch(url, {
         method: "POST",
@@ -78,7 +103,7 @@ export const api = {
   },
 
   getPdfUrl: (fileId: string) => {
-    return `${API_URL}/preview-pdf/${fileId}`;
+    return API_URL ? `${API_URL}/preview-pdf/${fileId}` : `/preview-pdf/${fileId}`;
   },
   
   async deleteFile(fileId: string): Promise<boolean> {
