@@ -63,12 +63,11 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				pdf: {
-					primary: '#6366f1',
-					secondary: '#a5b4fc',
-					accent: '#3b82f6',
-					background: '#1A1F2C',
-					text: '#E2E8F0'
+				google: {
+					blue: '#4285F4',
+					red: '#DB4437',
+					yellow: '#F4B400',
+					green: '#0F9D58'
 				}
 			},
 			borderRadius: {
