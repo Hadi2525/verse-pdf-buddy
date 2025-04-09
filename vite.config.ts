@@ -1,9 +1,11 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command }) => {
+export default defineConfig(({ command, mode }) => {
   // Set base dynamically based on the command
   const base = command === "serve" ? "/" : "/static";
 
@@ -14,7 +16,8 @@ export default defineConfig(({ command }) => {
     },
     plugins: [
       react(),       // React plugin with SWC for faster compilation
-    ],
+      mode === 'development' && componentTagger(),
+    ].filter(Boolean),
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),  // Alias for src directory
