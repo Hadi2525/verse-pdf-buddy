@@ -5,23 +5,28 @@ WORKDIR /app
 
 COPY package*.json ./
 RUN rm -f package-lock.json && \
+    npm install -g npm && \
     npm install && \
+    npm install vite --save-dev && \
     npm cache clean --force
 
 COPY . .
-RUN ROLLUP_WASM=1 npm run build && rm -rf node_modules
+RUN chmod +x node_modules/.bin/vite && \
+    ROLLUP_WASM=1 npm run build && \
+    rm -rf node_modules
 
 # Stage 2: Set up Python backend with Ollama
 FROM python:3.12-slim AS runtime
 
 WORKDIR /app
 
-# Install curl and procps, run Ollama install, then clean up
+# Install curl and procps
 RUN apt-get update && apt-get install -y --no-install-recommends curl procps && \
-    curl -fsSL https://ollama.com/install.sh | sh && \
-    apt-get purge -y curl && \
-    apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
+
+# Manually install Ollama for arm64
+RUN curl -L -o /usr/local/bin/ollama https://github.com/ollama/ollama/releases/download/v0.1.32/ollama-linux-arm64 && \
+    chmod +x /usr/local/bin/ollama
 
 # Copy backend code
 COPY backend/ /app/backend/
@@ -38,14 +43,19 @@ COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && \
     pip install --no-cache-dir .
 
-# Install Hypercorn for Quart
-RUN pip install --no-cache-dir hypercorn
+# Install FastAPI and Uvicorn
+RUN pip install --no-cache-dir fastapi uvicorn
 
 # Pre-pull nomic-embed-text during build and clean up
 RUN ollama serve & sleep 10 && ollama pull nomic-embed-text && pkill ollama
 
+# Clean up curl and unnecessary packages
+RUN apt-get purge -y curl && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
 # Expose port 8080 for Cloud Run
 EXPOSE 8080
 
-# Optimized Hypercorn run command
-CMD ["/bin/sh", "-c", "ollama serve & sleep 5 && exec hypercorn main:app --bind 0.0.0.0:${PORT:-8080} --workers 4 --keep-alive 120 --graceful-timeout 30 --access-log - --error-log -"]
+# Optimized Uvicorn run command for FastAPI
+CMD ["/bin/sh", "-c", "ollama serve & sleep 5 && exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080} --workers 4 --timeout-keep-alive 120"]
