@@ -11,28 +11,28 @@
     --card-foreground: 220 10% 98%; /* Increased brightness */
     --popover: 220 25% 12%;
     --popover-foreground: 220 10% 98%; /* Increased brightness */
-    --primary: 140 55% 50%; /* Increased saturation and brightness */
-    --primary-foreground: 220 10% 98%; /* Increased brightness */
+    --primary: 140 55% 60%; /* Increased saturation and brightness even more */
+    --primary-foreground: 0 0% 100%; /* Pure white for best contrast */
     --secondary: 220 20% 16%;
-    --secondary-foreground: 220 10% 98%; /* Increased brightness */
+    --secondary-foreground: 0 0% 100%; /* Pure white for best contrast */
     --muted: 220 20% 16%;
-    --muted-foreground: 220 20% 85%; /* Increased brightness for better readability */
-    --accent: 140 40% 30%; /* Increased saturation */
-    --accent-foreground: 220 10% 98%; /* Increased brightness */
-    --destructive: 0 70% 60%; /* Increased saturation and brightness */
-    --destructive-foreground: 220 10% 98%; /* Increased brightness */
-    --border: 220 20% 25%; /* Slightly brighter borders */
-    --input: 220 20% 25%; /* Slightly brighter inputs */
-    --ring: 140 60% 55%; /* Brighter ring */
+    --muted-foreground: 220 20% 90%; /* Significantly increased brightness for better readability */
+    --accent: 140 40% 40%; /* Increased saturation and brightness */
+    --accent-foreground: 0 0% 100%; /* Pure white for best contrast */
+    --destructive: 0 70% 65%; /* Increased brightness */
+    --destructive-foreground: 0 0% 100%; /* Pure white for best contrast */
+    --border: 220 20% 30%; /* Brighter borders */
+    --input: 220 20% 30%; /* Brighter inputs */
+    --ring: 140 60% 60%; /* Brighter ring */
     --radius: .75rem;
     --sidebar-background: 220 20% 12%;
     --sidebar-foreground: 220 10% 98%; /* Increased brightness */
-    --sidebar-primary: 140 60% 50%; /* Brighter sidebar primary */
-    --sidebar-primary-foreground: 220 10% 98%; /* Increased brightness */
+    --sidebar-primary: 140 60% 60%; /* Brighter sidebar primary */
+    --sidebar-primary-foreground: 0 0% 100%; /* Pure white for best contrast */
     --sidebar-accent: 220 20% 16%;
-    --sidebar-accent-foreground: 220 10% 98%; /* Increased brightness */
-    --sidebar-border: 220 20% 25%; /* Slightly brighter borders */
-    --sidebar-ring: 140 60% 55%; /* Brighter ring */
+    --sidebar-accent-foreground: 0 0% 100%; /* Pure white for best contrast */
+    --sidebar-border: 220 20% 30%; /* Brighter borders */
+    --sidebar-ring: 140 60% 60%; /* Brighter ring */
   }
 
   .light {
