@@ -1,20 +1,26 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from utils.format_request import format_context_list
-from utils.pdf_reader import get_pdf_in_bytes, read_from_pdf_in_bytes
-import asyncio
+from mistralai import Mistral
+from gridfs import GridFS
 from services.vector_db import VectorDB
-from google.genai import Client as GoogleClient
-from core.config import GEMINI_API_KEY, GEMINI_MODEL, EMBEDDING_MODEL, SYSTEM_PROMPT
+from core.config import GEMINI_MODEL, EMBEDDING_MODEL
 import ollama
 from services.llm_service import LLMService
 from typing import List, Dict
 from pydantic import BaseModel
+import os
+from io import BytesIO
+from bson.objectid import ObjectId
+from gridfs.errors import NoFile
+from urllib.parse import quote
 
 vector_db = VectorDB()
-google_client = GoogleClient(api_key=GEMINI_API_KEY)
+fs = GridFS(vector_db.db)
+mistral_client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))
+
 embedding_function = ollama.AsyncClient()
 llm_service = LLMService(provider="gemini")
 
@@ -112,50 +118,142 @@ async def insert_doc(document: Dict):
     return {"status": "insert failed"}
 
 @app.post("/index-pdf")
-async def index_documents(
-    file: UploadFile = File(...)
-):
+async def index_documents(file: UploadFile = File(...)):
+    vector_db.clean_collection()
     try:
-        vector_db.clean_collection()
-        
-        # Check file format
-        if not file.filename.endswith(".pdf"):
-            raise HTTPException(status_code=400, detail="invalid file format")
-            
-        # Read the file contents directly into bytes
+        # Validate file type
+        if file.content_type != "application/pdf":
+            raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+
+        # Read PDF bytes
         pdf_bytes = await file.read()
-        pdf_pages_in_bytes = get_pdf_in_bytes(pdf_bytes)
+
+        # Save to GridFS
+        with fs.new_file(filename=file.filename, content_type=file.content_type) as grid_out:
+            grid_out.write(pdf_bytes)
+            file_id = grid_out._id
+
+        # Process OCR using Mistral AI
+        # Prepare file content as bytes for Mistral upload
+        file_content = BytesIO(pdf_bytes)
         
-        # Process all pages
-        for page_number, page in enumerate(pdf_pages_in_bytes, start=1):
-            page_in_json = read_from_pdf_in_bytes(
-                page=page,
-                google_client=google_client,
-                system_prompt=SYSTEM_PROMPT
-            )
-            
-            for item in page_in_json:
+        # Upload the file to Mistral
+        uploaded_file = mistral_client.files.upload(
+            file={
+                "file_name": file.filename,
+                "content": file_content.getvalue(),  # Get bytes from BytesIO
+            },
+            purpose="ocr"
+        )
+
+        # Retrieve signed URL from Mistral
+        signed_url = mistral_client.files.get_signed_url(file_id=uploaded_file.id)
+
+        # Perform OCR processing using the signed URL
+        ocr_response = mistral_client.ocr.process(
+            model="mistral-ocr-latest",
+            document={
+                "type": "document_url",
+                "document_url": signed_url.url  # Access URL as attribute
+            }
+        )
+
+        page_count = 0
+        if hasattr(ocr_response, 'pages'):
+            for idx, page in enumerate(ocr_response.pages):
+                text = page.text if hasattr(page, 'text') else str(page)
+                reference = f"Page {idx + 1}"
                 aembeddings = await embedding_function.embed(
                     model=EMBEDDING_MODEL,
-                    input=item["text"]
+                    input=text
                 )
                 embeddings = aembeddings["embeddings"][0]
                 document = {
-                    "content": item["text"],
-                    "reference": item["reference"],
+                    "content": text,
+                    "reference": reference,
                     "document_embedding": embeddings
                 }
                 vector_db.insert(document)
-                await asyncio.sleep(0.5)  # Rate limiting
-            
-            await asyncio.sleep(1)  # Avoid API quota limits
-                
-        return {
+                page_count += 1
+        else:
+            # Fallback for single page or different structure
+            text = str(ocr_response)
+            aembeddings = await embedding_function.embed(
+                model=EMBEDDING_MODEL,
+                input=text
+            )
+            embeddings = aembeddings["embeddings"][0]
+            document = {
+                "content": text,
+                "reference": "Page 1",
+                "document_embedding": embeddings
+            }
+            vector_db.insert(document)
+            page_count = 1
+
+        # Ensure all IDs are serialized properly
+        response = {
             "message": "PDF processed successfully",
             "filename": file.filename,
             "size": len(pdf_bytes),
-            "page_count": len(pdf_pages_in_bytes),
-            "status": "indexed"
+            "page_count": page_count,
+            "file_id": str(file_id),  # Convert MongoDB ObjectId to string
+            "ocr_result_id": str(uploaded_file.id),  # Ensure Mistral file ID is a string
+            "status": "indexed",
+            "file_details": {
+                "id": str(file_id),  # Use MongoDB file_id, converted to string
+                "filename": file.filename  # No need for hasattr check here, file.filename is always available
+            }
         }
+
+        return response
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing PDF: {str(e)}")
+    
+    
+@app.get("/preview-pdf/{file_id}")
+async def preview_pdf(file_id: str):
+    """
+    Stream a PDF file from GridFS using the file ID.
+    """
+    try:
+        # Validate file_id
+        if not ObjectId.is_valid(file_id):
+            raise HTTPException(status_code=400, detail="Invalid file ID format")
+
+        file_id_obj = ObjectId(file_id)
+
+        # Retrieve the file from GridFS
+        grid_file = fs.get(file_id_obj)
+
+        # Stream the PDF in chunks
+        def stream_pdf():
+            chunk_size = 8192  # 8KB chunks
+            while True:
+                data = grid_file.read(chunk_size)
+                if not data:
+                    break
+                yield data
+
+        # Safely encode filename for Content-Disposition header
+        filename_encoded = quote(grid_file.filename)
+        content_disposition = f'inline; filename="{grid_file.filename}"; filename*=UTF-8\'\'{filename_encoded}'
+
+        # Return streaming response
+        return StreamingResponse(
+            stream_pdf(),
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": content_disposition,
+                "Content-Length": str(grid_file.length),
+            }
+        )
+
+    except NoFile:
+        raise HTTPException(status_code=404, detail="File not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving PDF: {str(e)}")
+    finally:
+        if 'grid_file' in locals():
+            grid_file.close()

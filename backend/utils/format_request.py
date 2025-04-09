@@ -31,8 +31,10 @@ def format_context_list(search_results):
     # Format each result into clean markdown
     formatted_results = []
     for result in search_results:
-        if "content" in result and "reference" in result:
-            formatted_results.append(f"### {result['reference']}\n\n{result['content']}\n")
+        if "text" in result and "reference" in result:
+            # Clean up the markdown text by removing the technical dimensions part
+            content = result['text'].split("mensions")[0] if "mensions" in result['text'] else result['text']
+            formatted_results.append(f"### {result['reference']}\n\n{content.strip()}\n")
     
     # Join all formatted results
     context = "\n".join(formatted_results)

@@ -1,10 +1,9 @@
-quart
-quart-cors
-hypercorn
+fastapi
+mistralai
 google-genai
-PyPDF2==3.9.0
+PyPDF2
 pymongo
 python-dotenv
 ollama
-python-multipart==0.0.20
+python-multipart
 openai
