@@ -3,6 +3,7 @@ import React from "react";
 import { ChatMessage, Reference } from "@/types";
 import { cn } from "@/lib/utils";
 import { User, Bot, BookOpen } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 interface MessageProps {
   message: ChatMessage;
@@ -36,8 +37,16 @@ const Message: React.FC<MessageProps> = ({
         isUser ? "items-end" : "items-start"
       )}>
         <div className={isUser ? "chat-bubble-user" : "chat-bubble-ai"}>
-          <div className="whitespace-pre-wrap">
-            {message.content}
+          <div className="prose prose-invert max-w-none">
+            {isUser ? (
+              <div className="whitespace-pre-wrap">{message.content}</div>
+            ) : (
+              <ReactMarkdown 
+                className="markdown-content"
+              >
+                {message.content}
+              </ReactMarkdown>
+            )}
           </div>
         </div>
         
