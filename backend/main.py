@@ -33,7 +33,7 @@ class GenerateRequest(BaseModel):
 app = FastAPI()
 
 # Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 # Add CORS configuration
 app.add_middleware(

@@ -24,8 +24,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends curl procps && \
     rm -rf /var/lib/apt/lists/*
 
-# Manually install Ollama for arm64
-RUN curl -L -o /usr/local/bin/ollama https://github.com/ollama/ollama/releases/download/v0.1.32/ollama-linux-arm64 && \
+# Manually install Ollama for amd64
+RUN curl -L -o /usr/local/bin/ollama https://github.com/ollama/ollama/releases/download/v0.1.32/ollama-linux-amd64 && \
     chmod +x /usr/local/bin/ollama
 
 # Copy backend code
@@ -43,11 +43,11 @@ COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && \
     pip install --no-cache-dir .
 
-# Install FastAPI and Uvicorn
-RUN pip install --no-cache-dir fastapi uvicorn
-
-# Pre-pull nomic-embed-text during build and clean up
-RUN ollama serve & sleep 10 && ollama pull nomic-embed-text && pkill ollama
+# Pre-pull nomic-embed-text during build with explicit steps
+RUN ollama serve & \
+    sleep 10 && \
+    ollama pull nomic-embed-text || (echo "Failed to pull nomic-embed-text" && exit 1); \
+    pkill ollama || true
 
 # Clean up curl and unnecessary packages
 RUN apt-get purge -y curl && \

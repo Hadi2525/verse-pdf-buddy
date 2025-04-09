@@ -1,4 +1,5 @@
 fastapi
+uvicorn
 mistralai
 google-genai
 PyPDF2
