@@ -7,6 +7,14 @@ import { api } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 import { File, Upload, X, FileText } from "lucide-react";
 
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 interface FileUploadProps {
   onFileUploaded: (file: FileInfo) => void;
   activeFile?: FileInfo | null;
@@ -81,7 +89,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
       setIsUploading(true);
       setUploadProgress(0);
       
-      const tempId = crypto.randomUUID();
+      const tempId = generateUUID();
       tempFileIdRef.current = tempId;
       
       const tempFileInfo: FileInfo = {
@@ -179,7 +187,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded, activeFile }) =
         progressIntervalRef.current = null;
       }
       
-      const errorTempId = tempFileIdRef.current || crypto.randomUUID();
+      const errorTempId = tempFileIdRef.current || generateUUID();
       
       setUploadProgress(0);
       setIsUploading(false);
