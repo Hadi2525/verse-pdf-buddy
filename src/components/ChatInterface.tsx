@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { Send, Loader2, MessageSquare } from "lucide-react";
+import { Send, Loader2, MessageSquare, Trash2 } from "lucide-react";
 import Message from "./Message";
 import ReferenceList from "./ReferenceList";
 import { ChatMessage, Reference, FileInfo } from "@/types";
@@ -107,6 +107,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ files }) => {
     }
   };
 
+  const handleClearChat = () => {
+    setMessages([]);
+    setReferences([]);
+    setShowReferences(false);
+    
+    toast({
+      title: "Chat cleared",
+      description: "All messages have been removed",
+    });
+  };
+
   return (
     <div className="glass-card flex flex-col h-[600px] overflow-hidden">
       <div className="px-6 py-4 border-b border-border flex items-center justify-between">
@@ -121,6 +132,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ files }) => {
               : "Upload a PDF to start chatting"}
           </p>
         </div>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleClearChat}
+          disabled={messages.length === 0}
+          className="gap-1"
+        >
+          <Trash2 className="h-4 w-4" />
+          Clear Chat
+        </Button>
       </div>
       
       <div className="flex-1 flex flex-col overflow-hidden">
