@@ -1,10 +1,9 @@
-import { GenerateRequest, FileInfo, APIResponse } from "../types";
+import { GenerateRequest, APIResponse } from "../types";
 
-// Configure your backend URL here
-const API_URL = "http://localhost:8000"; // Change this to your actual backend URL
+// Get the base URL from environment variable with fallback
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export const api = {
-  // Add a method to get the base URL
   getBaseUrl: () => API_URL,
   
   async generateResponse(request: GenerateRequest): Promise<APIResponse> {
@@ -58,7 +57,6 @@ export const api = {
       const formData = new FormData();
       formData.append("file", file);
       
-      // Upload the entire PDF without specifying page range
       const url = `${API_URL}/index-pdf`;
       
       const response = await fetch(url, {
@@ -79,16 +77,12 @@ export const api = {
     }
   },
 
-  // Update PDF URL function to use API_URL
   getPdfUrl: (fileId: string) => {
     return `${API_URL}/preview-pdf/${fileId}`;
   },
   
-  // Add a function to delete a PDF file
   async deleteFile(fileId: string): Promise<boolean> {
     try {
-      // In a real implementation, this would call an API endpoint
-      // For now we're just returning success
       console.log(`File ${fileId} would be deleted on the server`);
       return true;
     } catch (error) {
