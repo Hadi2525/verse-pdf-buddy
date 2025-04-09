@@ -29,6 +29,7 @@ export const api = {
   
   async generateResponse(request: GenerateRequest): Promise<APIResponse> {
     try {
+      // Use absolute path to ensure request goes to current origin in Docker/production
       const url = API_URL ? `${API_URL}/generate-response` : '/generate-response';
       const response = await fetch(url, {
         method: "POST",
@@ -80,11 +81,14 @@ export const api = {
       const formData = new FormData();
       formData.append("file", file);
       
+      // Use absolute path from current window location in production
       const url = API_URL ? `${API_URL}/index-pdf` : '/index-pdf';
       
-      console.log("Uploading PDF to URL:", url);
+      // Log the full URL being used for debugging
+      const fullUrl = new URL(url, window.location.origin).href;
+      console.log("Uploading PDF to complete URL:", fullUrl);
       
-      const response = await fetch(url, {
+      const response = await fetch(fullUrl, {
         method: "POST",
         body: formData,
       });
@@ -103,7 +107,9 @@ export const api = {
   },
 
   getPdfUrl: (fileId: string) => {
-    return API_URL ? `${API_URL}/preview-pdf/${fileId}` : `/preview-pdf/${fileId}`;
+    const path = `/preview-pdf/${fileId}`;
+    // Use full URL to ensure correct path resolution
+    return API_URL ? `${API_URL}${path}` : new URL(path, window.location.origin).href;
   },
   
   async deleteFile(fileId: string): Promise<boolean> {
