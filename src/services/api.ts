@@ -18,7 +18,7 @@ function determineApiUrl() {
   }
   
   // For local development, fallback to localhost
-  return "http://localhost:8080";
+  return "https://pdf-buddy-1016285216432.us-central1.run.app";
 }
 
 // Get the base URL according to our environment

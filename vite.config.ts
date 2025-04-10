@@ -26,7 +26,7 @@ export default defineConfig(({ command, mode }) => {
     define: {
       // Expose environment variables to the client-side
       // Use process.env with fallback for compatibility
-      "import.meta.env.VITE_API_URL": JSON.stringify(process.env.VITE_API_URL || ""),
+      "import.meta.env.VITE_API_URL": JSON.stringify(process.env.VITE_API_URL || "https://pdf-buddy-1016285216432.us-central1.run.app"),
       "import.meta.env.PROD": mode === 'production',
     },
     base,  // Use the dynamically set base
