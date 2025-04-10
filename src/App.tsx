@@ -7,23 +7,30 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { useState } from "react";
+import DisclaimerDialog from "./components/DisclaimerDialog";
 
 const App = () => {
   // Create QueryClient inside the component function
   const [queryClient] = useState(() => new QueryClient());
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(
+    localStorage.getItem("acceptedDisclaimer") === "true"
+  );
   
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <DisclaimerDialog onAccept={() => setDisclaimerAccepted(true)} />
+        {disclaimerAccepted && (
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        )}
       </TooltipProvider>
     </QueryClientProvider>
   );
