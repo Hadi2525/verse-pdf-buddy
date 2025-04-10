@@ -30,10 +30,7 @@ const DisclaimerDialog = ({ onAccept }: DisclaimerDialogProps) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="space-y-3">
-          <div className="mx-auto bg-amber-100 rounded-full p-2">
-            <AlertCircle className="h-6 w-6 text-amber-600" />
-          </div>
-          <DialogTitle className="text-center text-xl">Disclaimer</DialogTitle>
+          <DialogTitle className="text-center text-xl">Hello & Welcome!</DialogTitle>
           <DialogDescription className="text-center">
             Before you proceed, please read and accept the following disclaimer
           </DialogDescription>
@@ -54,6 +51,9 @@ const DisclaimerDialog = ({ onAccept }: DisclaimerDialogProps) => {
             <li>You will verify important information from official sources</li>
             <li>You assume responsibility for decisions made based on information provided by this tool</li>
           </ul>
+          <p>
+            PDF Buddy Team
+          </p>
         </div>
 
         <DialogFooter className="flex flex-col sm:flex-row sm:justify-center pt-2">
