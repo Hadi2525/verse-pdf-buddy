@@ -15,18 +15,10 @@ RUN chmod +x node_modules/.bin/vite && \
     ROLLUP_WASM=1 npm run build && \
     rm -rf node_modules
 
-# Stage 2: Set up Python backend with Ollama
+# Stage 2: Set up Python backend
 FROM python:3.12-slim AS runtime
 
 WORKDIR /app
-
-# Install curl and procps
-RUN apt-get update && apt-get install -y --no-install-recommends curl procps && \
-    rm -rf /var/lib/apt/lists/*
-
-# Manually install Ollama for amd64
-RUN curl -L -o /usr/local/bin/ollama https://github.com/ollama/ollama/releases/download/v0.1.32/ollama-linux-amd64 && \
-    chmod +x /usr/local/bin/ollama
 
 # Copy backend code
 COPY backend/ /app/backend/
@@ -43,19 +35,8 @@ COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt && \
     pip install --no-cache-dir .
 
-# Pre-pull nomic-embed-text during build with explicit steps
-RUN ollama serve & \
-    sleep 10 && \
-    ollama pull nomic-embed-text || (echo "Failed to pull nomic-embed-text" && exit 1); \
-    pkill ollama || true
-
-# Clean up curl and unnecessary packages
-RUN apt-get purge -y curl && \
-    apt-get autoremove -y && \
-    rm -rf /var/lib/apt/lists/*
-
 # Expose port 8080 for Cloud Run
 EXPOSE 8080
 
-# Optimized Uvicorn run command for FastAPI
-CMD ["/bin/sh", "-c", "ollama serve & sleep 5 && exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080} --workers 4 --timeout-keep-alive 120"]
+# Run Uvicorn directly
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "4", "--timeout-keep-alive", "120"]

@@ -3,25 +3,29 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from utils.format_request import format_context_list
+from services.embeddings import embeddings_function
 from mistralai import Mistral
 from gridfs import GridFS
 from services.vector_db import VectorDB
 from core.config import GEMINI_MODEL, EMBEDDING_MODEL
-import ollama
 from services.llm_service import LLMService
 from typing import List, Dict
 from pydantic import BaseModel
 import os
+import time
 from io import BytesIO
 from bson.objectid import ObjectId
 from gridfs.errors import NoFile
 from urllib.parse import quote
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 vector_db = VectorDB()
 fs = GridFS(vector_db.db)
 mistral_client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))
 
-embedding_function = ollama.AsyncClient()
 llm_service = LLMService(provider="gemini")
 
 class GenerateRequest(BaseModel):
@@ -127,11 +131,13 @@ async def index_documents(file: UploadFile = File(...)):
 
         # Read PDF bytes
         pdf_bytes = await file.read()
+        logger.info(f"Received PDF: {file.filename}, size: {len(pdf_bytes)} bytes")
 
         # Save to GridFS
         with fs.new_file(filename=file.filename, content_type=file.content_type) as grid_out:
             grid_out.write(pdf_bytes)
             file_id = grid_out._id
+        logger.info(f"Saved to GridFS with file_id: {file_id}")
 
         # Process OCR using Mistral AI
         # Prepare file content as bytes for Mistral upload
@@ -145,6 +151,7 @@ async def index_documents(file: UploadFile = File(...)):
             },
             purpose="ocr"
         )
+        logger.info(f"Uploaded to Mistral, file ID: {uploaded_file.id}")
 
         # Retrieve signed URL from Mistral
         signed_url = mistral_client.files.get_signed_url(file_id=uploaded_file.id)
@@ -157,17 +164,16 @@ async def index_documents(file: UploadFile = File(...)):
                 "document_url": signed_url.url  # Access URL as attribute
             }
         )
+        logger.info("OCR processed successfully using signed URL")
 
         page_count = 0
         if hasattr(ocr_response, 'pages'):
             for idx, page in enumerate(ocr_response.pages):
                 text = page.text if hasattr(page, 'text') else str(page)
                 reference = f"Page {idx + 1}"
-                aembeddings = await embedding_function.embed(
-                    model=EMBEDDING_MODEL,
-                    input=text
+                embeddings = embeddings_function(
+                    text=text
                 )
-                embeddings = aembeddings["embeddings"][0]
                 document = {
                     "content": text,
                     "reference": reference,
@@ -175,14 +181,13 @@ async def index_documents(file: UploadFile = File(...)):
                 }
                 vector_db.insert(document)
                 page_count += 1
+                time.sleep(0.5)  # Optional delay to avoid overwhelming the DB
         else:
             # Fallback for single page or different structure
             text = str(ocr_response)
-            aembeddings = await embedding_function.embed(
-                model=EMBEDDING_MODEL,
-                input=text
+            embeddings = embeddings_function(
+                text=text
             )
-            embeddings = aembeddings["embeddings"][0]
             document = {
                 "content": text,
                 "reference": "Page 1",
@@ -205,7 +210,7 @@ async def index_documents(file: UploadFile = File(...)):
                 "filename": file.filename  # No need for hasattr check here, file.filename is always available
             }
         }
-
+        logger.info(f"PDF processing completed: {response}")
         return response
 
     except Exception as e:

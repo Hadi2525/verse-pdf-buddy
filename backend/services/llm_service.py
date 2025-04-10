@@ -2,8 +2,6 @@ from openai import OpenAI
 from core.config import GEMINI_API_KEY, GEMINI_BASE_URL
 
 
-
-
 class LLMService:
     """
     A service class to handle API calls to various Large Language Model (LLM) providers.

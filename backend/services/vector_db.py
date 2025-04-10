@@ -6,8 +6,7 @@ from core.config import MONGODB_CONNECTION_STRING, MONGODB_DATABASE, \
                             MONGODB_SEARCH_INDEX_NAME, MONGODB_SEARCH_TOP_K, \
                             MONGODB_VECTOR_EMBEDDING_PATH
 from utils.format_request import format_inserts
-import ollama
-
+from services.embeddings import embeddings_function
 
 class VectorDB:
     def __init__(self):
@@ -22,7 +21,6 @@ class VectorDB:
         self.mongodb_client = MongoClient(MONGODB_CONNECTION_STRING)
         self.db = self.mongodb_client[MONGODB_DATABASE]
         self.collection: Collection = self.db[MONGODB_COLLECTION]
-        self.aembeddings = ollama.AsyncClient()
 
     def ping(self):
         """
@@ -48,9 +46,7 @@ class VectorDB:
         """
         Find data in the MongoDB collection
         """
-        aembeddings = await self.aembeddings.embed(model= EMBEDDING_MODEL,
-                                                  input = data)
-        embeddings = aembeddings["embeddings"][0]
+        embeddings = embeddings_function(text = data)
 
         pipeline = [
             {
