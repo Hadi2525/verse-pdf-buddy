@@ -36,7 +36,7 @@ const DisclaimerDialog = ({ onAccept }: DisclaimerDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-md" showClose={false}>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader className="space-y-3">
           <div className="mx-auto bg-amber-100 rounded-full p-2">
             <AlertCircle className="h-6 w-6 text-amber-600" />
