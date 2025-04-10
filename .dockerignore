@@ -1,1 +1,37 @@
-# backend/.env
+# Python cache and virtual environments
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+backend/.env
+venv/
+env/
+*.egg-info/
+
+# Node modules (React frontend dev dependencies)
+frontend/node_modules/
+
+# React development artifacts
+frontend/public/
+frontend/src/
+frontend/.env
+frontend/.env.* # if you use env files for different modes
+
+# Logs
+*.log
+
+# OS / Editor junk
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Git
+.git
+.gitignore
+
+# Docker files you don't want in the image
+.dockerignore
+docker-compose.yml
