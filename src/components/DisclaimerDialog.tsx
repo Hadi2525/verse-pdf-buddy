@@ -18,18 +18,10 @@ interface DisclaimerDialogProps {
 const DisclaimerDialog = ({ onAccept }: DisclaimerDialogProps) => {
   const [open, setOpen] = useState(true);
 
-  // Check if the user has already accepted the disclaimer
-  useEffect(() => {
-    const hasAcceptedDisclaimer = localStorage.getItem("acceptedDisclaimer");
-    if (hasAcceptedDisclaimer) {
-      setOpen(false);
-      onAccept();
-    }
-  }, [onAccept]);
+  // No longer checking localStorage - disclaimer will show on every refresh
 
   const handleAccept = () => {
-    // Save user acceptance in localStorage
-    localStorage.setItem("acceptedDisclaimer", "true");
+    // No longer saving to localStorage
     setOpen(false);
     onAccept();
   };

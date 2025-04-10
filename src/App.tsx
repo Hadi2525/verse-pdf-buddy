@@ -12,9 +12,7 @@ import DisclaimerDialog from "./components/DisclaimerDialog";
 const App = () => {
   // Create QueryClient inside the component function
   const [queryClient] = useState(() => new QueryClient());
-  const [disclaimerAccepted, setDisclaimerAccepted] = useState(
-    localStorage.getItem("acceptedDisclaimer") === "true"
-  );
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   
   return (
     <QueryClientProvider client={queryClient}>
